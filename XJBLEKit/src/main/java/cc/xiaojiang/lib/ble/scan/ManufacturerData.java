@@ -6,7 +6,7 @@ import android.os.Parcelable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import cc.xiaojiang.lib.ble.BleDevice;
+import cc.xiaojiang.lib.ble.XJBleDevice;
 import cc.xiaojiang.lib.ble.utils.ByteUtils;
 
 
@@ -46,7 +46,7 @@ public class ManufacturerData implements Parcelable {
         StringBuilder did = new StringBuilder();
         StringBuilder scanId = new StringBuilder();
         for (int i = 0; i < 6; i++) {
-            if (BleDevice.PLATFORM_AL.equals(platform)) {
+            if (XJBleDevice.PLATFORM_AL.equals(platform)) {
                 did.append(String.format("%02x",
                         ByteUtils.getUnsignedByte(didOrMac[i])));
             } else {

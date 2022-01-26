@@ -1,18 +1,13 @@
 package cc.xiaojiang.lib.ble.test;
 
 
-import android.bluetooth.BluetoothDevice;
-import android.os.Build;
-
-
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cc.xiaojiang.lib.ble.BleDevice;
+import cc.xiaojiang.lib.ble.XJBleDevice;
 import cc.xiaojiang.lib.ble.XJBleManager;
 
 /**
@@ -29,8 +24,8 @@ public class MultipleBluetoothController {
     }
 
     // 获取BleBlueTooth实例
-    public synchronized BleConnect buildConnectingBle(BleDevice bleDevice) {
-        BleConnect bleConnect = new BleConnect(bleDevice);
+    public synchronized BleConnect buildConnectingBle(XJBleDevice XJBleDevice) {
+        BleConnect bleConnect = new BleConnect(XJBleDevice);
         if (!bleTempHashMap.containsKey(bleConnect.getDeviceKey())) {
             bleTempHashMap.put(bleConnect.getDeviceKey(), bleConnect);
         }
@@ -64,18 +59,18 @@ public class MultipleBluetoothController {
         }
     }
 
-    public synchronized boolean isContainDevice(BleDevice bleDevice) {
-        return bleDevice != null && bleLruHashMap.containsKey(bleDevice.getKey());
+    public synchronized boolean isContainDevice(XJBleDevice XJBleDevice) {
+        return XJBleDevice != null && bleLruHashMap.containsKey(XJBleDevice.getKey());
     }
 //
 //    public synchronized boolean isContainDevice(BluetoothDevice bluetoothDevice) {
 //        return bluetoothDevice != null && bleLruHashMap.containsKey(bluetoothDevice.getName() + bluetoothDevice.getAddress());
 //    }
 //
-    public synchronized BleConnect getBleBluetooth(BleDevice bleDevice) {
-        if (bleDevice != null) {
-            if (bleLruHashMap.containsKey(bleDevice.getKey())) {
-                return bleLruHashMap.get(bleDevice.getKey());
+    public synchronized BleConnect getBleBluetooth(XJBleDevice XJBleDevice) {
+        if (XJBleDevice != null) {
+            if (bleLruHashMap.containsKey(XJBleDevice.getKey())) {
+                return bleLruHashMap.get(XJBleDevice.getKey());
             }
         }
         return null;
@@ -83,11 +78,11 @@ public class MultipleBluetoothController {
 //
     /**
      * 断开蓝牙设备的连接
-     * @param bleDevice
+     * @param XJBleDevice
      */
-    public synchronized void disconnect(BleDevice bleDevice) {
-        if (isContainDevice(bleDevice)) {
-            getBleBluetooth(bleDevice).disconnect();
+    public synchronized void disconnect(XJBleDevice XJBleDevice) {
+        if (isContainDevice(XJBleDevice)) {
+            getBleBluetooth(XJBleDevice).disconnect();
         }
     }
 
@@ -123,9 +118,9 @@ public class MultipleBluetoothController {
      * 获取已经连接的蓝牙设备列表
      * @return
      */
-    public synchronized List<BleDevice> getDeviceList() {
+    public synchronized List<XJBleDevice> getDeviceList() {
         refreshConnectedDevice();
-        List<BleDevice> deviceList = new ArrayList<>();
+        List<XJBleDevice> deviceList = new ArrayList<>();
         for (BleConnect bleConnect : getBleBluetoothList()) {
             if (bleConnect != null) {
                 deviceList.add(bleConnect.getDevice());

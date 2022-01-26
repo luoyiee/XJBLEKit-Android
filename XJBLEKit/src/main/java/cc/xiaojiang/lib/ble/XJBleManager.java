@@ -2,13 +2,11 @@ package cc.xiaojiang.lib.ble;
 
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Looper;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -27,11 +25,9 @@ import cc.xiaojiang.lib.ble.data.BleStatusCallback;
 import cc.xiaojiang.lib.ble.data.BluetoothChangedObserver;
 import cc.xiaojiang.lib.ble.data.GpsChangedObserver;
 import cc.xiaojiang.lib.ble.data.GpsStatusCallback;
-import cc.xiaojiang.lib.ble.exception.OtherException;
 import cc.xiaojiang.lib.ble.scan.BleScanState;
 import cc.xiaojiang.lib.ble.scan.BleScanner;
 import cc.xiaojiang.lib.ble.test.BleConnect;
-import cc.xiaojiang.lib.ble.test.BleScanRuleConfig;
 import cc.xiaojiang.lib.ble.test.MultipleBluetoothController;
 import cc.xiaojiang.lib.ble.utils.BleLog;
 import cc.xiaojiang.lib.ble.utils.ByteUtils;
@@ -194,8 +190,8 @@ public class XJBleManager {
         BleScanner.getInstance().scan(callback);
     }
 
-    public boolean isConnected(BleDevice bleDevice) {
-        return getConnectState(bleDevice) == BluetoothProfile.STATE_CONNECTED;
+    public boolean isConnected(XJBleDevice XJBleDevice) {
+        return getConnectState(XJBleDevice) == BluetoothProfile.STATE_CONNECTED;
     }
 
     public void addDataChangeListener(BleDataChangeCallback callback) {
@@ -304,9 +300,9 @@ public class XJBleManager {
         return multipleBluetoothController;
     }
 
-    public BluetoothGatt connect(BleDevice bleDevice, IBleAuth iBleAuth,
+    public BluetoothGatt connect(XJBleDevice XJBleDevice, IBleAuth iBleAuth,
                                  BleConnectCallback bleConnectCallback) {
-        return BleConnect.getInstance().connect(bleDevice, iBleAuth, bleConnectCallback);
+        return BleConnect.getInstance().connect(XJBleDevice, iBleAuth, bleConnectCallback);
     }
 
 
@@ -319,15 +315,15 @@ public class XJBleManager {
       BleConnect.getInstance().startAuth(iBleAuth);
     }
 
-    public boolean isConnectedWithDevice(BleDevice bleDevice) {
-        return getConnectState(bleDevice) == BluetoothProfile.STATE_CONNECTED;
+    public boolean isConnectedWithDevice(XJBleDevice XJBleDevice) {
+        return getConnectState(XJBleDevice) == BluetoothProfile.STATE_CONNECTED;
     }
 
     public boolean isConnected(String mac) {
-        List<BleDevice> list = getAllConnectedDevice();
-        for (BleDevice bleDevice : list) {
-            if (bleDevice != null) {
-                if (bleDevice.getMac().equals(mac)) {
+        List<XJBleDevice> list = getAllConnectedDevice();
+        for (XJBleDevice XJBleDevice : list) {
+            if (XJBleDevice != null) {
+                if (XJBleDevice.getMac().equals(mac)) {
                     return true;
                 }
             }
@@ -340,15 +336,15 @@ public class XJBleManager {
      *
      * @return
      */
-    public List<BleDevice> getAllConnectedDevice() {
+    public List<XJBleDevice> getAllConnectedDevice() {
         if (multipleBluetoothController == null)
             return null;
         return multipleBluetoothController.getDeviceList();
     }
 
-    public int getConnectState(BleDevice bleDevice) {
-        if (bleDevice != null) {
-            return bluetoothManager.getConnectionState(bleDevice.getDevice(), BluetoothProfile.GATT);
+    public int getConnectState(XJBleDevice XJBleDevice) {
+        if (XJBleDevice != null) {
+            return bluetoothManager.getConnectionState(XJBleDevice.getDevice(), BluetoothProfile.GATT);
         } else {
             return BluetoothProfile.STATE_DISCONNECTED;
         }
@@ -364,17 +360,17 @@ public class XJBleManager {
 ////            return null;
 ////        return multipleBluetoothController.getDeviceList();
 //    }
-    public BleDevice getConnectedDevice(String mac) {
+    public XJBleDevice getConnectedDevice(String mac) {
         if (multipleBluetoothController == null)
             return null;
-        BleDevice bleDevice = null;
-        for (BleDevice ble : multipleBluetoothController.getDeviceList()
+        XJBleDevice XJBleDevice = null;
+        for (XJBleDevice ble : multipleBluetoothController.getDeviceList()
         ) {
             if (ble.getMac().equals(mac)) {
-                bleDevice = ble;
+                XJBleDevice = ble;
             }
         }
-        return bleDevice;
+        return XJBleDevice;
     }
 
 

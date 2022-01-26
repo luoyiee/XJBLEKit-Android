@@ -2,11 +2,11 @@ package cc.xiaojiang.lib.ble;
 
 public interface IBleAuth {
 
-    String getBleKey(BleDevice bleDevice, String cipher);
+    String getBleKey(XJBleDevice XJBleDevice, String cipher);
 
-    String getRandom(BleDevice bleDevice);
+    String getRandom(XJBleDevice XJBleDevice);
 
-    String getToken(BleDevice bleDevice);
+    String getToken(XJBleDevice XJBleDevice);
 
     OtaInfo synchronizeOtaVersion(String productKey, String deviceUuid, String mcuVersion, String moduleVersion);
 

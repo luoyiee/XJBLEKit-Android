@@ -7,7 +7,7 @@ import android.os.Parcelable;
 import cc.xiaojiang.lib.ble.scan.ManufacturerData;
 
 
-public class BleDevice implements Parcelable {
+public class XJBleDevice implements Parcelable {
     //小匠平台
     public static final String PLATFORM_XJ = "xj";
     //阿里平台
@@ -18,7 +18,7 @@ public class BleDevice implements Parcelable {
     private String platform;
     private BluetoothDevice mDevice; // 扫描到的设备实例
 
-    public BleDevice(BluetoothDevice device) {
+    public XJBleDevice(BluetoothDevice device) {
         mDevice = device;
     }
 
@@ -32,7 +32,7 @@ public class BleDevice implements Parcelable {
 
     private String random;
 
-    public BleDevice() {
+    public XJBleDevice() {
     }
 
     public String getPlatform() {
@@ -110,7 +110,7 @@ public class BleDevice implements Parcelable {
         this.random = source.readString();
     }
 
-    protected BleDevice(Parcel in) {
+    protected XJBleDevice(Parcel in) {
         this.device = in.readParcelable(BluetoothDevice.class.getClassLoader());
         this.manufacturerData = in.readParcelable(ManufacturerData.class.getClassLoader());
         this.rssi = in.readInt();
@@ -118,15 +118,15 @@ public class BleDevice implements Parcelable {
         this.random = in.readString();
     }
 
-    public static final Creator<BleDevice> CREATOR = new Creator<BleDevice>() {
+    public static final Creator<XJBleDevice> CREATOR = new Creator<XJBleDevice>() {
         @Override
-        public BleDevice createFromParcel(Parcel source) {
-            return new BleDevice(source);
+        public XJBleDevice createFromParcel(Parcel source) {
+            return new XJBleDevice(source);
         }
 
         @Override
-        public BleDevice[] newArray(int size) {
-            return new BleDevice[size];
+        public XJBleDevice[] newArray(int size) {
+            return new XJBleDevice[size];
         }
     };
 

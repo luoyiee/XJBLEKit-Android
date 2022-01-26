@@ -1,10 +1,10 @@
 package cc.xiaojiang.lib.ble.callback;
 
-import cc.xiaojiang.lib.ble.BleDevice;
+import cc.xiaojiang.lib.ble.XJBleDevice;
 import cc.xiaojiang.lib.ble.exception.AuthException;
 
 public interface BleAuthCallback {
-    void onAuthSuccess(BleDevice var1);
+    void onAuthSuccess(XJBleDevice var1);
 
-    void onAuthFail(BleDevice var1, AuthException var2);
+    void onAuthFail(XJBleDevice var1, AuthException var2);
 }

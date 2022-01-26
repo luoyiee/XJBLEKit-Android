@@ -2,7 +2,7 @@ package cc.xiaojiang.lib.ble.callback;
 
 import android.bluetooth.BluetoothGatt;
 
-import cc.xiaojiang.lib.ble.BleDevice;
+import cc.xiaojiang.lib.ble.XJBleDevice;
 
 
 /**
@@ -10,7 +10,7 @@ import cc.xiaojiang.lib.ble.BleDevice;
  */
 public interface IBleAuthCallback {
 
-    public abstract void onAuthSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status);
+    public abstract void onAuthSuccess(XJBleDevice XJBleDevice, BluetoothGatt gatt, int status);
 
-    public abstract void onAuthFail(BleDevice bleDevice, BluetoothGatt gatt, int status);
+    public abstract void onAuthFail(XJBleDevice XJBleDevice, BluetoothGatt gatt, int status);
 }

@@ -1,8 +1,5 @@
 package cc.xiaojiang.lib.ble.callback.ota;
 
-import cc.xiaojiang.lib.ble.BleDevice;
-import cc.xiaojiang.lib.ble.OtaInfo;
-import cc.xiaojiang.lib.ble.exception.AuthException;
 import cc.xiaojiang.lib.ble.exception.BleException;
 
 public interface OtaVersionCallback {

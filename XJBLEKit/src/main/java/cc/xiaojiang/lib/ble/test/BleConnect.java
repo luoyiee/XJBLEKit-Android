@@ -24,13 +24,9 @@ import androidx.annotation.NonNull;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.UUID;
 
-import cc.xiaojiang.lib.ble.BleDevice;
+import cc.xiaojiang.lib.ble.XJBleDevice;
 import cc.xiaojiang.lib.ble.Constants;
 import cc.xiaojiang.lib.ble.IBleAuth;
 import cc.xiaojiang.lib.ble.OtaInfo;
@@ -67,7 +63,7 @@ public class BleConnect {
     private static final int CONNECT_RETRY_TIME = 2;
     private BluetoothGatt gatt;
     private LastState lastState;
-    private BleDevice bleDevice;
+    private XJBleDevice XJBleDevice;
     private OtaInfo.ContentBean.ModuleBean mInfo = new OtaInfo.ContentBean.ModuleBean();
 
     private BleConnectCallback bleConnectCallback;
@@ -103,8 +99,8 @@ public class BleConnect {
     public boolean isTimeOut = false;
     public byte bleCmd;
 
-    public BleConnect(BleDevice bleDevice) {
-        this.bleDevice = bleDevice;
+    public BleConnect(XJBleDevice XJBleDevice) {
+        this.XJBleDevice = XJBleDevice;
     }
 
     private BleConnect() {
@@ -129,7 +125,7 @@ public class BleConnect {
                     refreshDeviceCache();
 //                    closeBluetoothGatt();
                     if ((reconnectCount < CONNECT_RETRY_TIME) && !isActiveDisconnect) {
-                        connect(bleDevice, false, bleConnectCallback);
+                        connect(XJBleDevice, false, bleConnectCallback);
                         reconnectCount++;
                         BleLog.d("reconnect " + reconnectCount + "/" + CONNECT_RETRY_TIME);
                     } else {
@@ -138,7 +134,7 @@ public class BleConnect {
                         BleConnectStateParameter para = (BleConnectStateParameter) msg.obj;
                         int status = para.getStatus();
                         if (bleConnectCallback != null)
-                            bleConnectCallback.onConnectFail(bleDevice, new ConnectException(gatt, status));
+                            bleConnectCallback.onConnectFail(XJBleDevice, new ConnectException(gatt, status));
                     }
                     break;
                 case BleMsg.MSG_DISCONNECTED:
@@ -152,7 +148,7 @@ public class BleConnect {
                     boolean isActive = para.isActive();
                     int status = para.getStatus();
                     if (bleConnectCallback != null) {
-                        bleConnectCallback.onDisConnected(isActiveDisconnect, bleDevice, gatt, status);
+                        bleConnectCallback.onDisConnected(isActiveDisconnect, XJBleDevice, gatt, status);
                         if (gatt != null) {
                             gatt.close();
                             gatt = null;
@@ -167,7 +163,7 @@ public class BleConnect {
                     XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleConnect.this);
 
                     if (bleConnectCallback != null)
-                        bleConnectCallback.onConnectFail(bleDevice, new TimeoutException());
+                        bleConnectCallback.onConnectFail(XJBleDevice, new TimeoutException());
                     break;
                 /**
                  * 发现服务
@@ -193,7 +189,7 @@ public class BleConnect {
                     lastState = LastState.CONNECT_FAILURE;
                     XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleConnect.this);
                     if (bleConnectCallback != null) {
-                        bleConnectCallback.onConnectFail(bleDevice, new OtherException("GATT " +
+                        bleConnectCallback.onConnectFail(XJBleDevice, new OtherException("GATT " +
                                 "discover " +
                                 "services exception occurred!"));
                     }
@@ -205,7 +201,7 @@ public class BleConnect {
                     XJBleManager.getInstance().getMultipleBluetoothController().addBleBluetooth(BleConnect.this);
                     BleConnectStateParameter para1 = (BleConnectStateParameter) msg.obj;
                     if (bleConnectCallback != null) {
-                        bleConnectCallback.onConnectSuccess(bleDevice, gatt, para1.getStatus());
+                        bleConnectCallback.onConnectSuccess(XJBleDevice, gatt, para1.getStatus());
                     }
                     //start indicate, delay 50ms
                     Message message = mainHandler.obtainMessage();
@@ -235,14 +231,14 @@ public class BleConnect {
                 case BleMsg.MSG_CHA_NOTIFY_RESULT:
                     if ((boolean) msg.obj) {
                         BleLog.d("notify succeed");
-                        if (BleDevice.PLATFORM_XJ.equals(bleDevice.getPlatform()) && bleDevice.getManufacturerData().isNeedAuth()) {//小匠加密设备
+                        if (XJBleDevice.PLATFORM_XJ.equals(XJBleDevice.getPlatform()) && XJBleDevice.getManufacturerData().isNeedAuth()) {//小匠加密设备
                             new Thread(() -> {
-                                String random = mIBleAuth.getRandom(bleDevice);
+                                String random = mIBleAuth.getRandom(XJBleDevice);
                                 if (TextUtils.isEmpty(random)) {
                                     onAuthResult(false);
                                     return;
                                 }
-                                sendRandom(mIBleAuth.getRandom(bleDevice));
+                                sendRandom(mIBleAuth.getRandom(XJBleDevice));
                             }).start();
                             BleLog.d("start auth");
                         } else if (!mAuthed) {
@@ -258,12 +254,12 @@ public class BleConnect {
                  */
                 case BleMsg.MSG_AUTH_RANDOM:
                     new Thread(() -> {
-                        String random = mIBleAuth.getRandom(bleDevice);
+                        String random = mIBleAuth.getRandom(XJBleDevice);
                         if (TextUtils.isEmpty(random)) {
                             onAuthResult(false);
                             return;
                         }
-                        sendRandom(mIBleAuth.getRandom(bleDevice));
+                        sendRandom(mIBleAuth.getRandom(XJBleDevice));
                     }).start();
                     break;
                 case BleMsg.MSG_CHA_INDICATE_DATA_CHANGE:
@@ -289,7 +285,7 @@ public class BleConnect {
                                         return;
                                     }
                                     new Thread(() -> {
-                                        bleKey = mIBleAuth.getBleKey(bleDevice,
+                                        bleKey = mIBleAuth.getBleKey(XJBleDevice,
                                                 cipher.toUpperCase());
                                         if (TextUtils.isEmpty(bleKey)) {
                                             onAuthResult(false);
@@ -575,10 +571,10 @@ public class BleConnect {
         }
         if (isSucceed) {
             this.mAuthed = true;
-            this.mBleAuthCallback.onAuthSuccess(this.bleDevice);
+            this.mBleAuthCallback.onAuthSuccess(this.XJBleDevice);
             mBleAuthCallback = null;
         } else {
-            this.mBleAuthCallback.onAuthFail(this.bleDevice, new AuthException());
+            this.mBleAuthCallback.onAuthFail(this.XJBleDevice, new AuthException());
         }
         removeAuthStateListener();
     }
@@ -609,26 +605,26 @@ public class BleConnect {
     }
 
 
-    public synchronized BluetoothGatt connect(BleDevice bleDevice,
+    public synchronized BluetoothGatt connect(XJBleDevice XJBleDevice,
                                               boolean autoConnect,
                                               BleConnectCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("BleGattCallback can not be Null!");
         }
-        BleLog.i("connect device: " + bleDevice.getName()
-                + ",mac: " + bleDevice.getMac()
+        BleLog.i("connect device: " + XJBleDevice.getName()
+                + ",mac: " + XJBleDevice.getMac()
                 + ",autoConnect: " + autoConnect
                 + ",currentThread: " + Thread.currentThread().getId());
-        this.bleDevice = bleDevice;
+        this.XJBleDevice = XJBleDevice;
         bleConnectCallback = callback;
-        SPLIT_WRITE_NUM = bleDevice.getMaxSize();//新增查maxSize
+        SPLIT_WRITE_NUM = XJBleDevice.getMaxSize();//新增查maxSize
 
         lastState = LastState.CONNECT_CONNECTING;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            gatt = bleDevice.getDevice().connectGatt(XJBleManager.getInstance().getContext(),
+            gatt = XJBleDevice.getDevice().connectGatt(XJBleManager.getInstance().getContext(),
                     autoConnect, coreGattCallback, TRANSPORT_LE);
         } else {
-            gatt = bleDevice.getDevice().connectGatt(XJBleManager.getInstance().getContext(),
+            gatt = XJBleDevice.getDevice().connectGatt(XJBleManager.getInstance().getContext(),
                     autoConnect, coreGattCallback);
         }
 
@@ -646,7 +642,7 @@ public class BleConnect {
             lastState = LastState.CONNECT_FAILURE;
             XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleConnect.this);
             if (bleConnectCallback != null)
-                bleConnectCallback.onConnectFail(bleDevice, new OtherException("GATT connect " + "exception occurred!"));
+                bleConnectCallback.onConnectFail(XJBleDevice, new OtherException("GATT connect " + "exception occurred!"));
         }
         return gatt;
     }
@@ -754,7 +750,7 @@ public class BleConnect {
             receivedCurrent = value[2] & 0x0F;
             BleLog.i("receivedCurrent:" + receivedCurrent);
             byte[] payload = ByteUtils.subByte(value, 4, value[3]);
-            if (BleDevice.PLATFORM_XJ.equals(bleDevice.getPlatform()) && bleDevice.getManufacturerData().isNeedAuth() && mAuthed) {//XJ加密
+            if (XJBleDevice.PLATFORM_XJ.equals(XJBleDevice.getPlatform()) && XJBleDevice.getManufacturerData().isNeedAuth() && mAuthed) {//XJ加密
                 if (TextUtils.isEmpty(bleKey)) {
                     BleLog.e("call aes with empty key");
                     return;
@@ -911,7 +907,7 @@ public class BleConnect {
 
         //改动
         boolean isSplit;
-        if (BleDevice.PLATFORM_XJ.equals(bleDevice.getPlatform()) && bleDevice.getManufacturerData().isNeedAuth()) {//XJ加密
+        if (XJBleDevice.PLATFORM_XJ.equals(XJBleDevice.getPlatform()) && XJBleDevice.getManufacturerData().isNeedAuth()) {//XJ加密
             isSplit = payload.length + 5 > SPLIT_WRITE_NUM;
         } else {
             isSplit = payload.length + 4 > SPLIT_WRITE_NUM;
@@ -947,7 +943,7 @@ public class BleConnect {
 
         //改动
         boolean isSplit;
-        if (BleDevice.PLATFORM_XJ.equals(bleDevice.getPlatform()) && bleDevice.getManufacturerData().isNeedAuth()) {//XJ加密
+        if (XJBleDevice.PLATFORM_XJ.equals(XJBleDevice.getPlatform()) && XJBleDevice.getManufacturerData().isNeedAuth()) {//XJ加密
             isSplit = payload.length + 5 > SPLIT_WRITE_NUM;
         } else {
             isSplit = payload.length + 4 > SPLIT_WRITE_NUM;
@@ -1011,7 +1007,7 @@ public class BleConnect {
 
         byte byte0 = msgId;
 
-        if (BleDevice.PLATFORM_XJ.equals(bleDevice.getPlatform()) && bleDevice.getManufacturerData().isNeedAuth() && mAuthed) {//XJ加密
+        if (XJBleDevice.PLATFORM_XJ.equals(XJBleDevice.getPlatform()) && XJBleDevice.getManufacturerData().isNeedAuth() && mAuthed) {//XJ加密
             byte0 = (byte) (msgId + (0x01 << 4));
             if (TextUtils.isEmpty(bleKey)) {
                 BleLog.e("call aes with empty key");
@@ -1044,10 +1040,10 @@ public class BleConnect {
         BleLog.d("OTAData: " + ByteUtils.bytesToHexString(totalBuffer.array()) + ", length: " + totalBuffer.array().length);
     }
 
-    public BluetoothGatt connect(BleDevice bleDevice, IBleAuth iBleAuth,
+    public BluetoothGatt connect(XJBleDevice XJBleDevice, IBleAuth iBleAuth,
                                  BleConnectCallback bleConnectCallback) {
         this.mIBleAuth = iBleAuth;
-        return connect(bleDevice, false, bleConnectCallback);
+        return connect(XJBleDevice, false, bleConnectCallback);
     }
 
     public void startAuth(IBleAuth iBleAuth) {//不扫描直接认证
@@ -1164,7 +1160,7 @@ public class BleConnect {
         int fileSize = otaBytes.length;
         isOTALooping = true;
         final int[] packetLength = new int[1];
-        if (BleDevice.PLATFORM_XJ.equals(bleDevice.getPlatform()) && bleDevice.getManufacturerData().isNeedAuth()) {//XJ加密
+        if (XJBleDevice.PLATFORM_XJ.equals(XJBleDevice.getPlatform()) && XJBleDevice.getManufacturerData().isNeedAuth()) {//XJ加密
             packetSize = SPLIT_WRITE_NUM - 5;
         } else {
             packetSize = SPLIT_WRITE_NUM - 4;
@@ -1267,10 +1263,10 @@ public class BleConnect {
     }
 
     public String getDeviceKey() {
-        return bleDevice.getKey();
+        return XJBleDevice.getKey();
     }
 
-    public BleDevice getDevice() {
-        return bleDevice;
+    public XJBleDevice getDevice() {
+        return XJBleDevice;
     }
 }
