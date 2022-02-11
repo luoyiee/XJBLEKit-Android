@@ -52,6 +52,7 @@ import cc.xiaojiang.lib.ble.exception.ConnectException;
 import cc.xiaojiang.lib.ble.exception.OTAException;
 import cc.xiaojiang.lib.ble.exception.OtherException;
 import cc.xiaojiang.lib.ble.exception.TimeoutException;
+import cc.xiaojiang.lib.ble.scan.BleAuthStep;
 import cc.xiaojiang.lib.ble.utils.AES;
 import cc.xiaojiang.lib.ble.utils.BleLog;
 import cc.xiaojiang.lib.ble.utils.ByteUtils;
@@ -169,6 +170,8 @@ public class BleConnect {
                  * 发现服务
                  */
                 case BleMsg.MSG_DISCOVER_SERVICES:
+                    mBleAuthCallback.onAuthStep(BleAuthStep.START.getCode());
+
                     if (gatt != null) {
                         boolean discoverServiceResult = gatt.discoverServices();
                         if (!discoverServiceResult) {
@@ -246,6 +249,7 @@ public class BleConnect {
                             Message message1 = mainHandler.obtainMessage();
                             message1.what = BleMsg.MSG_AUTH_SUCCEED;
                             mainHandler.sendMessage(message1);
+                            mBleAuthCallback.onAuthStep(BleAuthStep.READY.getCode());
                         }
                     }
                     break;
@@ -348,11 +352,7 @@ public class BleConnect {
                             BleLog.d("errorTest" + ByteUtils.toHexStringSplit(payload));
                             byte errorCode84 = payload[0];
                             if (errorCode84 != 0) {
-//                                for (Map.Entry<String, BleDataChangeCallback> entry : mBleDataChangeCallbacks.entrySet()) {
-//                                    entry.getValue().onDataChanged(errorCode84, PayLoadUtils.CMD_DOWN_SNAPSHOT, null);
-//                                }
                                 mBleDataChangeCallback.onDataChanged(errorCode84, PayLoadUtils.CMD_DOWN_SNAPSHOT, null);
-
                                 return;
                             }
 
@@ -681,11 +681,11 @@ public class BleConnect {
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
-                    Message message = mainHandler.obtainMessage();
-                    message.what = BleMsg.MSG_DISCOVER_SERVICES;
-                    message.arg1 = status;
-                    mainHandler.sendMessageDelayed(message, 50);
-
+//                    Message message = mainHandler.obtainMessage();
+//                    message.what = BleMsg.MSG_DISCOVER_SERVICES;
+//                    message.arg1 = status;
+//                    mainHandler.sendMessageDelayed(message, 50);
+                    startAuth(mIBleAuth);
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                     if (lastState == LastState.CONNECT_CONNECTING) {
                         Message message = mainHandler.obtainMessage();
@@ -1254,7 +1254,6 @@ public class BleConnect {
         CONNECT_FAILURE,
         CONNECT_DISCONNECT
     }
-
 
     //新增点
     public synchronized void disconnect() {
