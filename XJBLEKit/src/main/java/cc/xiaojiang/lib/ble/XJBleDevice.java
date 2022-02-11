@@ -16,7 +16,7 @@ public class XJBleDevice implements Parcelable {
     private ManufacturerData manufacturerData;
     private int rssi;
 
-    private int id;
+    private String id;
     private String platform;
     private String random;
     private BluetoothDevice mDevice; // 扫描到的设备实例
@@ -36,11 +36,11 @@ public class XJBleDevice implements Parcelable {
     public XJBleDevice() {
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
