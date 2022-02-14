@@ -107,7 +107,7 @@ public class BleScanner {
     }
 
 
-    public XJBleDevice rnToBleDevice(BluetoothDevice device, HashMap<Object, Object> advertising, byte[] data) {
+    public XJBleDevice rnToBleDevice(BluetoothDevice device, HashMap<String, Object> advertising, byte[] data) {
         //获取厂商自定义格式广播
         if (advertising == null) {
             return null;
