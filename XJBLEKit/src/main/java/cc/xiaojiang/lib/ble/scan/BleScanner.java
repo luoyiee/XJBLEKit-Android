@@ -1,5 +1,6 @@
 package cc.xiaojiang.lib.ble.scan;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -11,6 +12,7 @@ import android.os.ParcelUuid;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import cc.xiaojiang.lib.ble.XJBleDevice;
@@ -103,6 +105,43 @@ public class BleScanner {
         XJBleDevice.setManufacturerData(manufacturerData);
         return XJBleDevice;
     }
+
+
+    private XJBleDevice rnToBleDevice(BluetoothDevice device, HashMap<Object, Object> advertising, byte[] data) {
+        //获取厂商自定义格式广播
+        if (advertising == null) {
+            return null;
+        }
+        ArrayList<Object> serviceUUIDs = (ArrayList) advertising.get("serviceUUIDs");
+        if (serviceUUIDs == null) {
+            return null;
+        }
+        XJBleDevice xjBleDevice = new XJBleDevice();
+        byte[] manufacturerSpecificData;
+        manufacturerSpecificData = data;
+        if (manufacturerSpecificData == null) {
+            BleLog.w("get manufacturerSpecificData null!");
+            return null;
+        }
+        if (manufacturerSpecificData.length != 12) {
+            BleLog.w("manufacturerSpecificData length error= " + manufacturerSpecificData.length);
+            return null;
+        }
+        if (serviceUUIDs.contains(Constants.XJ_MANUFACTURER_ID)) {
+            xjBleDevice.setPlatform(XJBleDevice.PLATFORM_XJ);
+        } else if (serviceUUIDs.contains(Constants.AL_MANUFACTURER_ID)) {
+            xjBleDevice.setPlatform(XJBleDevice.PLATFORM_AL);
+        }
+        BleLog.d("get Manufacturer Specific Data: " + ByteUtils.bytesToHexString
+                (manufacturerSpecificData));
+        ManufacturerData manufacturerData =
+                new ManufacturerData(manufacturerSpecificData, xjBleDevice.getPlatform());
+        xjBleDevice.setDevice(device);
+        xjBleDevice.setRssi(Double.valueOf(String.valueOf(advertising.get("rssi"))).intValue());
+        xjBleDevice.setManufacturerData(manufacturerData);
+        return xjBleDevice;
+    }
+
 
     private static final BleScanner ourInstance = new BleScanner();
 
@@ -202,7 +241,8 @@ public class BleScanner {
      * @param bleConnectCallback
      * @return
      */
-    public BluetoothGatt connect(XJBleDevice XJBleDevice, IBleAuth iBleAuth, BleConnectCallback bleConnectCallback) {
+    public BluetoothGatt connect(XJBleDevice XJBleDevice, IBleAuth iBleAuth, BleConnectCallback
+            bleConnectCallback) {
         if (bleConnectCallback == null) {
             throw new IllegalArgumentException("BleGattCallback can not be Null!");
         }
