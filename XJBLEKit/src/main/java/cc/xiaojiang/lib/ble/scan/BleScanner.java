@@ -150,8 +150,6 @@ public class BleScanner {
     }
 
     private BleScanner() {
-        bluetoothLeScanner =
-                XJBleManager.getInstance().getBluetoothAdapter().getBluetoothLeScanner();
     }
 
     public void scan(IBleScanCallback iBleScanCallback) {
@@ -200,6 +198,8 @@ public class BleScanner {
     }
 
     public void startLeScan(IBleScanCallback iBleScanCallback) {
+        bluetoothLeScanner =
+                XJBleManager.getInstance().getBluetoothAdapter().getBluetoothLeScanner();
         if (iBleScanCallback == null) {
             throw new IllegalArgumentException("can not start le scan with callback null!");
         }
