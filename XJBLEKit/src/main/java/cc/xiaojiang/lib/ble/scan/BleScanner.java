@@ -134,11 +134,11 @@ public class BleScanner {
         }
         if (manufacturerSpecificData == null) {
             BleLog.w("get manufacturerSpecificData null!");
-            return null;
+            return xjBleDevice;
         }
         if (manufacturerSpecificData.length != 12) {
             BleLog.w("manufacturerSpecificData length error= " + manufacturerSpecificData.length);
-            return null;
+            return xjBleDevice;
         }
         BleLog.d("get Manufacturer Specific Data: " + ByteUtils.bytesToHexString
                 (manufacturerSpecificData));
