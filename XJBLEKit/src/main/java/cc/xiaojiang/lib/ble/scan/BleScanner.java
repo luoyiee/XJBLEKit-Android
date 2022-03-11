@@ -3,6 +3,7 @@ package cc.xiaojiang.lib.ble.scan;
 import static cc.xiaojiang.lib.ble.Constants.AL_MANUFACTURER_ID;
 import static cc.xiaojiang.lib.ble.Constants.XJ_MANUFACTURER_ID;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -109,16 +110,20 @@ public class BleScanner {
         return xjBleDevice;
     }
 
-    public XJBleDevice rnToBleDevice(BluetoothDevice device, HashMap<String, Object> advertising, byte[] scanRecordBytes, int rssi) {
+    public XJBleDevice rnToBleDevice(HashMap<String, Object> propsMap, byte[] scanRecordBytes) {
         XJBleDevice xjBleDevice = new XJBleDevice();
-        xjBleDevice.setDevice(device);
-        xjBleDevice.setRssi(rssi);
-        String platform = "";
-        byte[] manufacturerSpecificData = null;
         //获取厂商自定义格式广播
-        if (advertising == null || scanRecordBytes == null) {
+        if (scanRecordBytes == null) {
             return xjBleDevice;
         }
+        String id = String.valueOf(propsMap.get("id"));
+        int rssi = Double.valueOf(String.valueOf(propsMap.get("rssi"))).intValue();
+        BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(id);
+        xjBleDevice.setDevice(device);
+        xjBleDevice.setRssi(rssi);
+        xjBleDevice.setId(id);
+        String platform = "";
+        byte[] manufacturerSpecificData = null;
         ScanRecordUtil scanRecordUtil = ScanRecordUtil.parseFromBytes(scanRecordBytes);
         if (scanRecordUtil.getManufacturerSpecificData() == null) {
             return xjBleDevice;
