@@ -114,34 +114,38 @@ public class BleScanner {
         if (advertising == null || scanRecordBytes == null) {
             return null;
         }
-        ScanRecordUtil scanRecordUtil = ScanRecordUtil.parseFromBytes(scanRecordBytes);
         String platform = "";
         byte[] manufacturerSpecificData = null;
         XJBleDevice xjBleDevice = new XJBleDevice();
-        if (scanRecordUtil.getManufacturerSpecificData(Constants.XJ_MANUFACTURER_ID) != null) {
-            manufacturerSpecificData = scanRecordUtil.getManufacturerSpecificData(XJ_MANUFACTURER_ID);
-            platform = XJBleDevice.PLATFORM_XJ;
-            xjBleDevice.setPlatform(XJBleDevice.PLATFORM_XJ);
-        } else if (scanRecordUtil.getManufacturerSpecificData(AL_MANUFACTURER_ID) != null) {
-            manufacturerSpecificData = scanRecordUtil.getManufacturerSpecificData(Constants.AL_MANUFACTURER_ID);
-            platform = XJBleDevice.PLATFORM_AL;
-            xjBleDevice.setPlatform(XJBleDevice.PLATFORM_AL);
+        try {
+            ScanRecordUtil scanRecordUtil = ScanRecordUtil.parseFromBytes(scanRecordBytes);
+            if (scanRecordUtil.getManufacturerSpecificData(Constants.XJ_MANUFACTURER_ID) != null) {
+                manufacturerSpecificData = scanRecordUtil.getManufacturerSpecificData(XJ_MANUFACTURER_ID);
+                platform = XJBleDevice.PLATFORM_XJ;
+                xjBleDevice.setPlatform(XJBleDevice.PLATFORM_XJ);
+            } else if (scanRecordUtil.getManufacturerSpecificData(AL_MANUFACTURER_ID) != null) {
+                manufacturerSpecificData = scanRecordUtil.getManufacturerSpecificData(Constants.AL_MANUFACTURER_ID);
+                platform = XJBleDevice.PLATFORM_AL;
+                xjBleDevice.setPlatform(XJBleDevice.PLATFORM_AL);
+            }
+            if (manufacturerSpecificData == null) {
+                BleLog.w("get manufacturerSpecificData null!");
+                return null;
+            }
+            if (manufacturerSpecificData.length != 12) {
+                BleLog.w("manufacturerSpecificData length error= " + manufacturerSpecificData.length);
+                return null;
+            }
+            BleLog.d("get Manufacturer Specific Data: " + ByteUtils.bytesToHexString
+                    (manufacturerSpecificData));
+            ManufacturerData manufacturerData =
+                    new ManufacturerData(manufacturerSpecificData, platform);
+            xjBleDevice.setDevice(device);
+            xjBleDevice.setRssi(rssi);
+            xjBleDevice.setManufacturerData(manufacturerData);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        if (manufacturerSpecificData == null) {
-            BleLog.w("get manufacturerSpecificData null!");
-            return null;
-        }
-        if (manufacturerSpecificData.length != 12) {
-            BleLog.w("manufacturerSpecificData length error= " + manufacturerSpecificData.length);
-            return null;
-        }
-        BleLog.d("get Manufacturer Specific Data: " + ByteUtils.bytesToHexString
-                (manufacturerSpecificData));
-        ManufacturerData manufacturerData =
-                new ManufacturerData(manufacturerSpecificData, platform);
-        xjBleDevice.setDevice(device);
-        xjBleDevice.setRssi(rssi);
-        xjBleDevice.setManufacturerData(manufacturerData);
         return xjBleDevice;
     }
 
