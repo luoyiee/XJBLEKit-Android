@@ -78,7 +78,7 @@ public class XJBleDevice implements Parcelable {
     public String getName() {
         if (device != null)
             return device.getName();
-        return null;
+        return "";
     }
 
     public String getMac() {
