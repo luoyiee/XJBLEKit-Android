@@ -80,16 +80,16 @@ public class BleScanner {
             BleLog.w("getScanRecord null!");
             return null;
         }
-        XJBleDevice XJBleDevice = new XJBleDevice();
+        XJBleDevice xjBleDevice = new XJBleDevice();
         byte[] manufacturerSpecificData = null;
         if (result.getScanRecord().getServiceUuids().contains(ParcelUuid.fromString(Constants.UUID_XJ_SERVICE))) {
             manufacturerSpecificData =
                     result.getScanRecord().getManufacturerSpecificData(Constants.XJ_MANUFACTURER_ID);
-            XJBleDevice.setPlatform(XJBleDevice.PLATFORM_XJ);
+            xjBleDevice.setPlatform(XJBleDevice.PLATFORM_XJ);
         } else if (result.getScanRecord().getServiceUuids().contains(ParcelUuid.fromString(Constants.UUID_AL_SERVICE))) {
             manufacturerSpecificData =
                     result.getScanRecord().getManufacturerSpecificData(Constants.AL_MANUFACTURER_ID);
-            XJBleDevice.setPlatform(XJBleDevice.PLATFORM_AL);
+            xjBleDevice.setPlatform(XJBleDevice.PLATFORM_AL);
         }
         if (manufacturerSpecificData == null) {
             BleLog.w("get manufacturerSpecificData null!");
@@ -102,22 +102,22 @@ public class BleScanner {
         BleLog.d("get Manufacturer Specific Data: " + ByteUtils.bytesToHexString
                 (manufacturerSpecificData));
         ManufacturerData manufacturerData =
-                new ManufacturerData(manufacturerSpecificData, XJBleDevice.getPlatform());
-        XJBleDevice.setDevice(result.getDevice());
-        XJBleDevice.setRssi(result.getRssi());
-        XJBleDevice.setManufacturerData(manufacturerData);
-        return XJBleDevice;
+                new ManufacturerData(manufacturerSpecificData, xjBleDevice.getPlatform());
+        xjBleDevice.setDevice(result.getDevice());
+        xjBleDevice.setRssi(result.getRssi());
+        xjBleDevice.setManufacturerData(manufacturerData);
+        return xjBleDevice;
     }
 
-    public XJBleDevice rnToBleDevice(BluetoothDevice device, HashMap<String, Object> advertising, byte[] scanRecordBytes) {
+    public XJBleDevice rnToBleDevice(BluetoothDevice device, HashMap<String, Object> advertising, byte[] scanRecordBytes, int rssi) {
         //获取厂商自定义格式广播
         if (advertising == null || scanRecordBytes == null) {
             return null;
         }
         ScanRecordUtil scanRecordUtil = ScanRecordUtil.parseFromBytes(scanRecordBytes);
         String platform = "";
-        XJBleDevice xjBleDevice = new XJBleDevice();
         byte[] manufacturerSpecificData = null;
+        XJBleDevice xjBleDevice = new XJBleDevice();
         if (scanRecordUtil.getManufacturerSpecificData(Constants.XJ_MANUFACTURER_ID) != null) {
             manufacturerSpecificData = scanRecordUtil.getManufacturerSpecificData(XJ_MANUFACTURER_ID);
             platform = XJBleDevice.PLATFORM_XJ;
@@ -140,7 +140,7 @@ public class BleScanner {
         ManufacturerData manufacturerData =
                 new ManufacturerData(manufacturerSpecificData, platform);
         xjBleDevice.setDevice(device);
-        xjBleDevice.setRssi(Double.valueOf(String.valueOf(advertising.get("rssi"))).intValue());
+        xjBleDevice.setRssi(rssi);
         xjBleDevice.setManufacturerData(manufacturerData);
         return xjBleDevice;
     }
