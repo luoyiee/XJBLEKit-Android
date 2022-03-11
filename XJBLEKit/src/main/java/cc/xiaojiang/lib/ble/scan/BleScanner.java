@@ -110,18 +110,18 @@ public class BleScanner {
     }
 
     public XJBleDevice rnToBleDevice(BluetoothDevice device, HashMap<String, Object> advertising, byte[] scanRecordBytes, int rssi) {
-        //获取厂商自定义格式广播
-        if (advertising == null || scanRecordBytes == null) {
-            return null;
-        }
+        XJBleDevice xjBleDevice = new XJBleDevice();
+        xjBleDevice.setDevice(device);
+        xjBleDevice.setRssi(rssi);
         String platform = "";
         byte[] manufacturerSpecificData = null;
-        XJBleDevice xjBleDevice = new XJBleDevice();
+        //获取厂商自定义格式广播
+        if (advertising == null || scanRecordBytes == null) {
+            return xjBleDevice;
+        }
         ScanRecordUtil scanRecordUtil = ScanRecordUtil.parseFromBytes(scanRecordBytes);
-
         if (scanRecordUtil.getManufacturerSpecificData() == null) {
-            BleLog.w("get manufacturerSpecificData null!");
-            return null;
+            return xjBleDevice;
         }
         if (scanRecordUtil.getManufacturerSpecificData(Constants.XJ_MANUFACTURER_ID) != null) {
             manufacturerSpecificData = scanRecordUtil.getManufacturerSpecificData(XJ_MANUFACTURER_ID);
