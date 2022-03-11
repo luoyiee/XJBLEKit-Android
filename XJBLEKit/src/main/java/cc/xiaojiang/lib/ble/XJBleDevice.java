@@ -13,12 +13,12 @@ public class XJBleDevice implements Parcelable {
     //阿里平台
     public static final String PLATFORM_AL = "tm";
     private BluetoothDevice device;
-    private ManufacturerData manufacturerData;
-    private int rssi;
+    private ManufacturerData manufacturerData = new ManufacturerData();
+    private int rssi = 0;
 
-    private String id;
-    private String platform;
-    private String random;
+    private String id = "";
+    private String platform = "";
+    private String random = "";
     private BluetoothDevice mDevice; // 扫描到的设备实例
 
     public XJBleDevice(BluetoothDevice device) {

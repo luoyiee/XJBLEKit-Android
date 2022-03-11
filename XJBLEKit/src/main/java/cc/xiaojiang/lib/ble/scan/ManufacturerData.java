@@ -11,18 +11,21 @@ import cc.xiaojiang.lib.ble.utils.ByteUtils;
 
 
 public class ManufacturerData implements Parcelable {
-    private int version;
-    private int subType;
+    private int version = 0;
+    private int subType = 0;
     private byte FMSK;
-    private long pid;
-    private String did;
-    private String scanId;
-    private int bleVersion;
-    private boolean isSupportOta;
-    private boolean isNeedAuth;
-    private int encryptionType;
-    private boolean isSafeBroadcast;
-    private boolean isBound;
+    private String pid = "";
+    private String did = "";
+    private String scanId = "";
+    private int bleVersion = 0;
+    private boolean isSupportOta = false;
+    private boolean isNeedAuth = false;
+    private int encryptionType = 0;
+    private boolean isSafeBroadcast = false;
+    private boolean isBound = false;
+
+    public ManufacturerData() {
+    }
 
     public ManufacturerData(byte[] manufacturerSpecificData, String platform) {
         //解析广播数据
@@ -32,7 +35,7 @@ public class ManufacturerData implements Parcelable {
         version = ByteUtils.getLow4(versionSubtype);
         subType = ByteUtils.getHeight4(versionSubtype);
         FMSK = manufacturerSpecificDataBuffer.get();//1字节
-        pid = ByteUtils.getUnsignedInt(manufacturerSpecificDataBuffer.getInt());//4字节
+        pid = ByteUtils.getUnsignedInt(manufacturerSpecificDataBuffer.getInt()) + "";//4字节
         bleVersion = FMSK & 0b00000011;//2
         isSupportOta = ((FMSK >> 2) & 0b00000001) == 1;//1
         isNeedAuth = ((FMSK >> 3) & 0b00000001) == 1;//1
@@ -51,7 +54,7 @@ public class ManufacturerData implements Parcelable {
                         ByteUtils.getUnsignedByte(didOrMac[i])));
             } else {
                 int i1 = Integer.parseInt(String.valueOf(didOrMac[i]));
-                if(!isNeedAuth) {
+                if (!isNeedAuth) {
                     if (encryptionType == 0) {//一型一密
                         scanId = scanId.append(String.format("%02x", ByteUtils.getUnsignedByte(didOrMac[i])));
                     } else {
@@ -91,11 +94,11 @@ public class ManufacturerData implements Parcelable {
         this.FMSK = FMSK;
     }
 
-    public long getPid() {
+    public String getPid() {
         return pid;
     }
 
-    public void setPid(long pid) {
+    public void setPid(String pid) {
         this.pid = pid;
     }
 
@@ -192,7 +195,7 @@ public class ManufacturerData implements Parcelable {
         dest.writeInt(this.version);
         dest.writeInt(this.subType);
         dest.writeByte(this.FMSK);
-        dest.writeLong(this.pid);
+        dest.writeString(this.pid);
         dest.writeString(this.did);
         dest.writeInt(this.bleVersion);
         dest.writeByte(this.isSupportOta ? (byte) 1 : (byte) 0);
@@ -206,7 +209,7 @@ public class ManufacturerData implements Parcelable {
         this.version = source.readInt();
         this.subType = source.readInt();
         this.FMSK = source.readByte();
-        this.pid = source.readLong();
+        this.pid = source.readString();
         this.did = source.readString();
         this.bleVersion = source.readInt();
         this.isSupportOta = source.readByte() != 0;
@@ -220,7 +223,7 @@ public class ManufacturerData implements Parcelable {
         this.version = in.readInt();
         this.subType = in.readInt();
         this.FMSK = in.readByte();
-        this.pid = in.readLong();
+        this.pid = in.readString();
         this.did = in.readString();
         this.bleVersion = in.readInt();
         this.isSupportOta = in.readByte() != 0;
