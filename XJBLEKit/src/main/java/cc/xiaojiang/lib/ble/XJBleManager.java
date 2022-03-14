@@ -315,6 +315,12 @@ public class XJBleManager {
       BleConnect.getInstance().startAuth(context,xjBleDevice,iBleAuth);
     }
 
+    public void getSnapshot(XJBleDevice xjBleDevice ) {
+        BleConnect.getInstance().getSnapshot(xjBleDevice);
+    }
+
+
+
     public boolean isConnectedWithDevice(XJBleDevice XJBleDevice) {
         return getConnectState(XJBleDevice) == BluetoothProfile.STATE_CONNECTED;
     }

@@ -1056,6 +1056,24 @@ public class BleConnect {
         mainHandler.sendMessageDelayed(message, 50);
     }
 
+
+    public void getSnapshot(XJBleDevice xjBleDevice) {//不扫描直接认证
+        this.xjBleDevice = xjBleDevice;
+        write(new byte[]{(byte) 0x00}, (byte) 0x84, new BleWriteCallback() {
+            @Override
+            public void onWriteSuccess(int current, int total,
+                                       byte[] justWrite) {
+                BleLog.d("attrModels" + ByteUtils.toHexStringSplit(justWrite));
+            }
+
+            @Override
+            public void onWriteFailure(BleException exception) {
+                BleLog.d("attrModels" + exception);
+            }
+        });
+    }
+
+
     public synchronized void addConnectGattCallback(BleConnectCallback callback) {
         bleConnectCallback = callback;
     }
