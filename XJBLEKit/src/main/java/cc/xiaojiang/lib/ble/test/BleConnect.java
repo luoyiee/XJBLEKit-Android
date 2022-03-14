@@ -168,7 +168,7 @@ public class BleConnect {
                  * 发现服务
                  */
                 case BleMsg.MSG_DISCOVER_SERVICES:
-                    mBleAuthCallback.onAuthStep(xjBleDevice,BleAuthStep.START.getCode());
+                    mBleAuthCallback.onAuthStep(xjBleDevice, BleAuthStep.START.getCode());
 
                     if (gatt != null) {
                         boolean discoverServiceResult = gatt.discoverServices();
@@ -244,7 +244,7 @@ public class BleConnect {
                             Message message1 = mainHandler.obtainMessage();
                             message1.what = BleMsg.MSG_AUTH_SUCCEED;
                             mainHandler.sendMessage(message1);
-                            mBleAuthCallback.onAuthStep(xjBleDevice,BleAuthStep.READY.getCode());
+                            mBleAuthCallback.onAuthStep(xjBleDevice, BleAuthStep.READY.getCode());
                         }
                     }
                     break;
@@ -1001,7 +1001,7 @@ public class BleConnect {
 
         byte byte0 = msgId;
 
-        if (XJBleDevice.PLATFORM_XJ.equals(xjBleDevice.getPlatform()) &&  xjBleDevice.getManufacturerData().isSecretAuthEnable() && mAuthed) {//XJ加密
+        if (XJBleDevice.PLATFORM_XJ.equals(xjBleDevice.getPlatform()) && xjBleDevice.getManufacturerData().isSecretAuthEnable() && mAuthed) {//XJ加密
             byte0 = (byte) (msgId + (0x01 << 4));
             if (TextUtils.isEmpty(bleKey)) {
                 BleLog.e("call aes with empty key");
@@ -1041,7 +1041,7 @@ public class BleConnect {
     }
 
     public void startAuth(Context context, XJBleDevice xjBleDevice, IBleAuth iBleAuth) {//不扫描直接认证
-        this.xjBleDevice=xjBleDevice;
+        this.xjBleDevice = xjBleDevice;
         this.mIBleAuth = iBleAuth;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             gatt = xjBleDevice.getDevice().connectGatt(context,
@@ -1050,10 +1050,10 @@ public class BleConnect {
             gatt = xjBleDevice.getDevice().connectGatt(context,
                     false, coreGattCallback);
         }
-        //start indicate, delay 50ms
-//        Message message = mainHandler.obtainMessage();
-//        message.what = BleMsg.MSG_CHA_INDICATE_START;
-//        mainHandler.sendMessageDelayed(message, 50);
+        // start indicate, delay 50ms
+        Message message = mainHandler.obtainMessage();
+        message.what = BleMsg.MSG_CHA_INDICATE_START;
+        mainHandler.sendMessageDelayed(message, 50);
     }
 
     public synchronized void addConnectGattCallback(BleConnectCallback callback) {
