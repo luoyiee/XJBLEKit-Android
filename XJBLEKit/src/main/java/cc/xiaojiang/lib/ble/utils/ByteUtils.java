@@ -117,6 +117,19 @@ public class ByteUtils {
         return builder.toString().replaceFirst(divider, "");
     }
 
+    public static String bytesToRealHexString(byte[] bytes) {
+        String divider = "";
+        StringBuilder builder = new StringBuilder();
+        for (byte aByte : bytes) {
+            builder.append(divider);
+            builder.append(String.format("%02x", ByteUtils.getUnsignedByte(aByte)).toUpperCase());
+        }
+        return builder.toString().replaceFirst(divider, "");
+    }
+
+
+
+
     public static byte[] hexStrToBytes(String hexStr) {
         byte[] val = new byte[hexStr.length() / 2];
         for (int i = 0; i < val.length; i++) {

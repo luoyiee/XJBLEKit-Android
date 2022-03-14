@@ -6,6 +6,7 @@ import static cc.xiaojiang.lib.ble.Constants.UUID_XJ_CHARACTERISTIC_NOTIFY;
 import static cc.xiaojiang.lib.ble.Constants.UUID_XJ_CHARACTERISTIC_WRITE;
 import static cc.xiaojiang.lib.ble.Constants.UUID_XJ_CHARACTERISTIC_WRITE_WITH_NO_RESPONSE;
 import static cc.xiaojiang.lib.ble.Constants.UUID_XJ_SERVICE;
+import static cc.xiaojiang.lib.ble.utils.ByteUtils.bytesToRealHexString;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
@@ -310,7 +311,7 @@ public class BleConnect {
                             break;
                         case 0x03:
                             try {
-                                mBleDataChangeCallback.onDataChanged(0, PayLoadUtils.CMD_DOWN_REPORT, PayLoadUtils.decodeAttrModels(payload));
+                                mBleDataChangeCallback.onDataChanged(0, PayLoadUtils.CMD_DOWN_REPORT, bytesToRealHexString(payload));
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -336,7 +337,7 @@ public class BleConnect {
                             byte errorCode82 = payload[0];
                             try {
                                 byte[] payloadReal = ByteUtils.subByte(payload, 1, payload.length - 1);
-                                mBleDataChangeCallback.onDataChanged(errorCode82, PayLoadUtils.CMD_DOWN_GET, PayLoadUtils.decodeAttrModels(payloadReal));
+                                mBleDataChangeCallback.onDataChanged(errorCode82, PayLoadUtils.CMD_DOWN_GET, bytesToRealHexString(payloadReal));
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -353,7 +354,7 @@ public class BleConnect {
 
                             try {
                                 byte[] payloadReal = ByteUtils.subByte(payload, 1, payload.length - 1);
-                                mBleDataChangeCallback.onDataChanged(0, PayLoadUtils.CMD_DOWN_SNAPSHOT, PayLoadUtils.decodeAttrModels(payloadReal));
+                                mBleDataChangeCallback.onDataChanged(0, PayLoadUtils.CMD_DOWN_SNAPSHOT, bytesToRealHexString(payloadReal));
 
                             } catch (Exception e) {
                                 e.printStackTrace();

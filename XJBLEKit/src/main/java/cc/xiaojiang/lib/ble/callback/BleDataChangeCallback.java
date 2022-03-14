@@ -9,5 +9,5 @@ import cc.xiaojiang.lib.ble.data.AttrModel;
  */
 public interface BleDataChangeCallback {
 
-    void onDataChanged(int errorCode,byte cmd, List<AttrModel> attrModels);
+    void onDataChanged(int errorCode,byte cmd, String hexString);
 }
