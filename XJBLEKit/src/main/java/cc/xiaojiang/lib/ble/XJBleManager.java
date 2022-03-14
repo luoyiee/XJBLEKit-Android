@@ -296,9 +296,9 @@ public class XJBleManager {
         return reConnectInterval;
     }
 
-    public MultipleBluetoothController getMultipleBluetoothController() {
-        return multipleBluetoothController;
-    }
+//    public MultipleBluetoothController getMultipleBluetoothController() {
+//        return multipleBluetoothController;
+//    }
 
     public BluetoothGatt connect(XJBleDevice XJBleDevice, IBleAuth iBleAuth,
                                  BleConnectCallback bleConnectCallback) {
