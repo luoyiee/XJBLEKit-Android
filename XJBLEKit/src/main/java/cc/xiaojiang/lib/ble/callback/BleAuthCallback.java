@@ -5,7 +5,7 @@ import cc.xiaojiang.lib.ble.exception.AuthException;
 
 public interface BleAuthCallback {
 
-    void onAuthStep(int step);
+    void onAuthStep(XJBleDevice var1,int step);
 
     void onAuthSuccess(XJBleDevice var1);
 

@@ -170,7 +170,7 @@ public class BleConnect {
                  * 发现服务
                  */
                 case BleMsg.MSG_DISCOVER_SERVICES:
-                    mBleAuthCallback.onAuthStep(BleAuthStep.START.getCode());
+                    mBleAuthCallback.onAuthStep(xjBleDevice,BleAuthStep.START.getCode());
 
                     if (gatt != null) {
                         boolean discoverServiceResult = gatt.discoverServices();
@@ -249,7 +249,7 @@ public class BleConnect {
                             Message message1 = mainHandler.obtainMessage();
                             message1.what = BleMsg.MSG_AUTH_SUCCEED;
                             mainHandler.sendMessage(message1);
-                            mBleAuthCallback.onAuthStep(BleAuthStep.READY.getCode());
+                            mBleAuthCallback.onAuthStep(xjBleDevice,BleAuthStep.READY.getCode());
                         }
                     }
                     break;
