@@ -2,6 +2,9 @@ package cc.xiaojiang.lib.ble.scan;
 
 import static cc.xiaojiang.lib.ble.Constants.AL_MANUFACTURER_ID;
 import static cc.xiaojiang.lib.ble.Constants.XJ_MANUFACTURER_ID;
+import static cc.xiaojiang.lib.ble.utils.DataUtils.getBool;
+import static cc.xiaojiang.lib.ble.utils.DataUtils.getInt;
+import static cc.xiaojiang.lib.ble.utils.DataUtils.getString;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -154,7 +157,6 @@ public class BleScanner {
         xjBleDevice.setManufacturerData(manufacturerData);
         return xjBleDevice;
     }
-
 
     private static final BleScanner ourInstance = new BleScanner();
 

@@ -8,21 +8,14 @@ import java.nio.ByteOrder;
 
 import cc.xiaojiang.lib.ble.XJBleDevice;
 import cc.xiaojiang.lib.ble.utils.ByteUtils;
+import lombok.Data;
 
-
+@Data
 public class ManufacturerData implements Parcelable {
-    private int version = 0;
-    private int subType = 0;
+    private int version = 0, subType = 0, bleVersion = 0, secretType = 0, cid = 0, authStep = 0;
     private byte FMSK;
-    private String pid = "";
-    private String did = "";
-    private String scanId = "";
-    private int bleVersion = 0;
-    private boolean isSupportOta = false;
-    private boolean isNeedAuth = false;
-    private int encryptionType = 0;
-    private boolean isSafeBroadcast = false;
-    private boolean isBound = false;
+    private String pid = "", did = "", scanId = "";
+    private boolean isSupportOta = false, secretAuthEnable = false, safeBroadcast = false, isBound = false,broadcastFeatureFlag=false,otaEnable=false;
 
     public ManufacturerData() {
     }
@@ -38,9 +31,9 @@ public class ManufacturerData implements Parcelable {
         pid = ByteUtils.getUnsignedInt(manufacturerSpecificDataBuffer.getInt()) + "";//4字节
         bleVersion = FMSK & 0b00000011;//2
         isSupportOta = ((FMSK >> 2) & 0b00000001) == 1;//1
-        isNeedAuth = ((FMSK >> 3) & 0b00000001) == 1;//1
-        encryptionType = ((FMSK >> 4) & 0b00000001);//1
-        isSafeBroadcast = ((FMSK >> 5) & 0b00000001) == 1;//1
+        secretAuthEnable = ((FMSK >> 3) & 0b00000001) == 1;//1
+        secretType = ((FMSK >> 4) & 0b00000001);//1
+        safeBroadcast = ((FMSK >> 5) & 0b00000001) == 1;//1
         isBound = ((FMSK >> 6) & 0b00000001) == 1;//1
         byte[] didOrMac = new byte[6];
         for (int i = 5; i >= 0; i--) {
@@ -54,8 +47,8 @@ public class ManufacturerData implements Parcelable {
                         ByteUtils.getUnsignedByte(didOrMac[i])));
             } else {
                 int i1 = Integer.parseInt(String.valueOf(didOrMac[i]));
-                if (!isNeedAuth) {
-                    if (encryptionType == 0) {//一型一密
+                if (!secretAuthEnable) {
+                    if (secretType == 0) {//一型一密
                         scanId = scanId.append(String.format("%02x", ByteUtils.getUnsignedByte(didOrMac[i])));
                     } else {
                         scanId = scanId.append((char) i1);
@@ -67,103 +60,6 @@ public class ManufacturerData implements Parcelable {
 
         this.did = did.toString();
         this.scanId = scanId.toString();
-
-    }
-
-    public int getVersion() {
-        return version;
-    }
-
-    public void setVersion(int version) {
-        this.version = version;
-    }
-
-    public int getSubType() {
-        return subType;
-    }
-
-    public void setSubType(int subType) {
-        this.subType = subType;
-    }
-
-    public byte getFMSK() {
-        return FMSK;
-    }
-
-    public void setFMSK(byte FMSK) {
-        this.FMSK = FMSK;
-    }
-
-    public String getPid() {
-        return pid;
-    }
-
-    public void setPid(String pid) {
-        this.pid = pid;
-    }
-
-    public String getDid() {
-        return did;
-    }
-
-    public void setDid(String did) {
-        this.did = did;
-    }
-
-    public String getScanId() {
-        return scanId;
-    }
-
-    public void setScanId(String scanId) {
-        this.scanId = scanId;
-    }
-
-    public int getBleVersion() {
-        return bleVersion;
-    }
-
-    public void setBleVersion(int bleVersion) {
-        this.bleVersion = bleVersion;
-    }
-
-    public boolean isSupportOta() {
-        return isSupportOta;
-    }
-
-    public void setSupportOta(boolean supportOta) {
-        isSupportOta = supportOta;
-    }
-
-    public boolean isNeedAuth() {
-        return isNeedAuth;
-    }
-
-    public void setNeedAuth(boolean needAuth) {
-        isNeedAuth = needAuth;
-    }
-
-    public int getEncryptionType() {
-        return encryptionType;
-    }
-
-    public void setEncryptionType(int encryptionType) {
-        this.encryptionType = encryptionType;
-    }
-
-    public boolean isSafeBroadcast() {
-        return isSafeBroadcast;
-    }
-
-    public void setSafeBroadcast(boolean safeBroadcast) {
-        isSafeBroadcast = safeBroadcast;
-    }
-
-    public boolean isBound() {
-        return isBound;
-    }
-
-    public void setBound(boolean bound) {
-        isBound = bound;
     }
 
     @Override
@@ -177,9 +73,9 @@ public class ManufacturerData implements Parcelable {
                 ", did='" + did + '\'' +
                 ", bleVersion=" + bleVersion +
                 ", isSupportOta=" + isSupportOta +
-                ", isNeedAuth=" + isNeedAuth +
-                ", encryptionType=" + encryptionType +
-                ", isSafeBroadcast=" + isSafeBroadcast +
+                ", isNeedAuth=" + secretAuthEnable +
+                ", encryptionType=" + secretType +
+                ", isSafeBroadcast=" + safeBroadcast +
                 ", isBound=" + isBound +
                 '}';
     }
@@ -199,9 +95,9 @@ public class ManufacturerData implements Parcelable {
         dest.writeString(this.did);
         dest.writeInt(this.bleVersion);
         dest.writeByte(this.isSupportOta ? (byte) 1 : (byte) 0);
-        dest.writeByte(this.isNeedAuth ? (byte) 1 : (byte) 0);
-        dest.writeInt(this.encryptionType);
-        dest.writeByte(this.isSafeBroadcast ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.secretAuthEnable ? (byte) 1 : (byte) 0);
+        dest.writeInt(this.secretType);
+        dest.writeByte(this.safeBroadcast ? (byte) 1 : (byte) 0);
         dest.writeByte(this.isBound ? (byte) 1 : (byte) 0);
     }
 
@@ -213,9 +109,9 @@ public class ManufacturerData implements Parcelable {
         this.did = source.readString();
         this.bleVersion = source.readInt();
         this.isSupportOta = source.readByte() != 0;
-        this.isNeedAuth = source.readByte() != 0;
-        this.encryptionType = source.readInt();
-        this.isSafeBroadcast = source.readByte() != 0;
+        this.secretAuthEnable = source.readByte() != 0;
+        this.secretType = source.readInt();
+        this.safeBroadcast = source.readByte() != 0;
         this.isBound = source.readByte() != 0;
     }
 
@@ -227,9 +123,9 @@ public class ManufacturerData implements Parcelable {
         this.did = in.readString();
         this.bleVersion = in.readInt();
         this.isSupportOta = in.readByte() != 0;
-        this.isNeedAuth = in.readByte() != 0;
-        this.encryptionType = in.readInt();
-        this.isSafeBroadcast = in.readByte() != 0;
+        this.secretAuthEnable = in.readByte() != 0;
+        this.secretType = in.readInt();
+        this.safeBroadcast = in.readByte() != 0;
         this.isBound = in.readByte() != 0;
     }
 
