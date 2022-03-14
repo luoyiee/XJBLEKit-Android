@@ -1059,6 +1059,7 @@ public class BleConnect {
 
     public void getSnapshot(XJBleDevice xjBleDevice) {//不扫描直接认证
         this.xjBleDevice = xjBleDevice;
+        SPLIT_WRITE_NUM = xjBleDevice.getMaxSize();//新增查maxSize
         write(new byte[]{(byte) 0x00}, (byte) 0x84, new BleWriteCallback() {
             @Override
             public void onWriteSuccess(int current, int total,
