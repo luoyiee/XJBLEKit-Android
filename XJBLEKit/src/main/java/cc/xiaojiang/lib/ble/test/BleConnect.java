@@ -674,10 +674,10 @@ public class BleConnect {
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
-//                    Message message = mainHandler.obtainMessage();
-//                    message.what = BleMsg.MSG_DISCOVER_SERVICES;
-//                    message.arg1 = status;
-//                    mainHandler.sendMessageDelayed(message, 50);
+                    Message message = mainHandler.obtainMessage();
+                    message.what = BleMsg.MSG_DISCOVER_SERVICES;
+                    message.arg1 = status;
+                    mainHandler.sendMessageDelayed(message, 50);
                     startAuth(xjBleDevice,mIBleAuth);
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                     if (lastState == LastState.CONNECT_CONNECTING) {
@@ -1042,9 +1042,17 @@ public class BleConnect {
     public void startAuth(XJBleDevice xjBleDevice,IBleAuth iBleAuth) {//不扫描直接认证
         this.xjBleDevice=xjBleDevice;
         this.mIBleAuth = iBleAuth;
-        Message message = mainHandler.obtainMessage();
-        message.what = BleMsg.MSG_DISCOVER_SERVICES;
-        mainHandler.sendMessageDelayed(message, 50);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            gatt = xjBleDevice.getDevice().connectGatt(XJBleManager.getInstance().getContext(),
+                    false, coreGattCallback, TRANSPORT_LE);
+        } else {
+            gatt = xjBleDevice.getDevice().connectGatt(XJBleManager.getInstance().getContext(),
+                    false, coreGattCallback);
+        }
+        //start indicate, delay 50ms
+//        Message message = mainHandler.obtainMessage();
+//        message.what = BleMsg.MSG_CHA_INDICATE_START;
+//        mainHandler.sendMessageDelayed(message, 50);
     }
 
     public synchronized void addConnectGattCallback(BleConnectCallback callback) {
