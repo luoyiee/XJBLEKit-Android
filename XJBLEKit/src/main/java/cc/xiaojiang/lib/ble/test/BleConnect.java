@@ -13,6 +13,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
+import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -678,7 +679,7 @@ public class BleConnect {
                     message.what = BleMsg.MSG_DISCOVER_SERVICES;
                     message.arg1 = status;
                     mainHandler.sendMessageDelayed(message, 50);
-                    startAuth(xjBleDevice,mIBleAuth);
+//                    startAuth(xjBleDevice,mIBleAuth);
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                     if (lastState == LastState.CONNECT_CONNECTING) {
                         Message message = mainHandler.obtainMessage();
@@ -1039,14 +1040,14 @@ public class BleConnect {
         return connect(XJBleDevice, false, bleConnectCallback);
     }
 
-    public void startAuth(XJBleDevice xjBleDevice,IBleAuth iBleAuth) {//不扫描直接认证
+    public void startAuth(Context context, XJBleDevice xjBleDevice, IBleAuth iBleAuth) {//不扫描直接认证
         this.xjBleDevice=xjBleDevice;
         this.mIBleAuth = iBleAuth;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            gatt = xjBleDevice.getDevice().connectGatt(XJBleManager.getInstance().getContext(),
+            gatt = xjBleDevice.getDevice().connectGatt(context,
                     false, coreGattCallback, TRANSPORT_LE);
         } else {
-            gatt = xjBleDevice.getDevice().connectGatt(XJBleManager.getInstance().getContext(),
+            gatt = xjBleDevice.getDevice().connectGatt(context,
                     false, coreGattCallback);
         }
         //start indicate, delay 50ms

@@ -311,8 +311,8 @@ public class XJBleManager {
         return BleScanner.getInstance().scanAndConnect(mac, iBleAuth, bleConnectCallback);
     }
 
-    public void startAuth(XJBleDevice xjBleDevice,IBleAuth iBleAuth) {
-      BleConnect.getInstance().startAuth(xjBleDevice,iBleAuth);
+    public void startAuth(Context context,XJBleDevice xjBleDevice,IBleAuth iBleAuth) {
+      BleConnect.getInstance().startAuth(context,xjBleDevice,iBleAuth);
     }
 
     public boolean isConnectedWithDevice(XJBleDevice XJBleDevice) {
