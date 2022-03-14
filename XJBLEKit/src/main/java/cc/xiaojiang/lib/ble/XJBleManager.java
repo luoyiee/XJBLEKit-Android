@@ -15,6 +15,7 @@ import cc.xiaojiang.lib.ble.callback.BleAuthCallback;
 import cc.xiaojiang.lib.ble.callback.BleConnectCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataChangeCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataSetCallback;
+import cc.xiaojiang.lib.ble.callback.BleSnapDataChangeCallback;
 import cc.xiaojiang.lib.ble.callback.BleWifiConfigCallback;
 import cc.xiaojiang.lib.ble.callback.IBleScanCallback;
 import cc.xiaojiang.lib.ble.callback.ota.OtaProgressCallBack;
@@ -315,8 +316,8 @@ public class XJBleManager {
       BleConnect.getInstance().startAuth(context,xjBleDevice,iBleAuth);
     }
 
-    public void getSnapshot(XJBleDevice xjBleDevice ) {
-        BleConnect.getInstance().getSnapshot(xjBleDevice);
+    public void getSnapshot(XJBleDevice xjBleDevice, BleSnapDataChangeCallback callback) {
+        BleConnect.getInstance().getSnapshot(xjBleDevice,callback);
     }
 
 

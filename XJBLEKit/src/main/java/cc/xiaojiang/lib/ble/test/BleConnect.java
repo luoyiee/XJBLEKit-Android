@@ -39,6 +39,7 @@ import cc.xiaojiang.lib.ble.callback.BleAuthCallback;
 import cc.xiaojiang.lib.ble.callback.BleConnectCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataChangeCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataSetCallback;
+import cc.xiaojiang.lib.ble.callback.BleSnapDataChangeCallback;
 import cc.xiaojiang.lib.ble.callback.BleWifiConfigCallback;
 import cc.xiaojiang.lib.ble.callback.BleWriteCallback;
 import cc.xiaojiang.lib.ble.callback.ota.OtaProgressCallBack;
@@ -89,6 +90,7 @@ public class BleConnect {
     private OtaProgressCallBack mOtaProgressCallBack;
     private OtaVersionCallback mOtaVersionCallback;
     private BleAuthCallback mBleAuthCallback;
+    private BleSnapDataChangeCallback mBleSnapDataChangeCallback;
     //接收数据分包计数
     private int receivedTotal;
     private int receivedCurrent;
@@ -348,13 +350,13 @@ public class BleConnect {
                             BleLog.d("errorTest" + ByteUtils.toHexStringSplit(payload));
                             byte errorCode84 = payload[0];
                             if (errorCode84 != 0) {
-                                mBleDataChangeCallback.onDataChanged(errorCode84, PayLoadUtils.CMD_DOWN_SNAPSHOT, null);
+                                mBleSnapDataChangeCallback.onDataChanged(errorCode84, PayLoadUtils.CMD_DOWN_SNAPSHOT, null);
                                 return;
                             }
 
                             try {
                                 byte[] payloadReal = ByteUtils.subByte(payload, 1, payload.length - 1);
-                                mBleDataChangeCallback.onDataChanged(0, PayLoadUtils.CMD_DOWN_SNAPSHOT, bytesToRealHexString(payloadReal));
+                                mBleSnapDataChangeCallback.onDataChanged(0, PayLoadUtils.CMD_DOWN_SNAPSHOT, bytesToRealHexString(payloadReal));
 
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -1058,7 +1060,8 @@ public class BleConnect {
     }
 
 
-    public void getSnapshot(XJBleDevice xjBleDevice) {//不扫描直接认证
+    public void getSnapshot(XJBleDevice xjBleDevice, BleSnapDataChangeCallback callback) {//不扫描直接认证
+        mBleSnapDataChangeCallback = callback;
         this.xjBleDevice = xjBleDevice;
         SPLIT_WRITE_NUM = xjBleDevice.getMaxSize();//新增查maxSize
         write(new byte[]{(byte) 0x00}, (byte) 0x84, new BleWriteCallback() {
