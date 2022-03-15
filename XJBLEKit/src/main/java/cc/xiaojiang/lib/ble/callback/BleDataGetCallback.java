@@ -11,7 +11,5 @@ public interface BleDataGetCallback {
     byte ERR_invalidPara = 0x04;
     byte ERR_Auth = 0x05;
 
-    void onDataGetSucceed(byte[] payload);
-
-    void onDataGetFailed(int code);
+    void onResult(int errorCode, String hexString);
 }

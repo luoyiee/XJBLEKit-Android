@@ -38,8 +38,9 @@ import cc.xiaojiang.lib.ble.bleInterface.OtaErrType;
 import cc.xiaojiang.lib.ble.callback.BleAuthCallback;
 import cc.xiaojiang.lib.ble.callback.BleConnectCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataChangeCallback;
+import cc.xiaojiang.lib.ble.callback.BleDataGetCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataSetCallback;
-import cc.xiaojiang.lib.ble.callback.BleSnapDataChangeCallback;
+import cc.xiaojiang.lib.ble.callback.BleSnapshotGetCallback;
 import cc.xiaojiang.lib.ble.callback.BleWifiConfigCallback;
 import cc.xiaojiang.lib.ble.callback.BleWriteCallback;
 import cc.xiaojiang.lib.ble.callback.ota.OtaProgressCallBack;
@@ -84,13 +85,14 @@ public class BleConnect {
     private int reconnectCount = 0;
     private static final BleConnect ourInstance = new BleConnect();
     private BleDataSetCallback mBleDataSetCallback;
+    private BleDataGetCallback mBleDataGetCallback;
     private BleWifiConfigCallback mBleWifiConfigCallback;
     private BleDataChangeCallback mBleDataChangeCallback;
     private OtaResultCallback mOtaResultCallback;
     private OtaProgressCallBack mOtaProgressCallBack;
     private OtaVersionCallback mOtaVersionCallback;
     private BleAuthCallback mBleAuthCallback;
-    private BleSnapDataChangeCallback mBleSnapDataChangeCallback;
+    private BleSnapshotGetCallback mBleSnapDataChangeCallback;
     //接收数据分包计数
     private int receivedTotal;
     private int receivedCurrent;
@@ -327,11 +329,7 @@ public class BleConnect {
                                 return;
                             }
                             byte errorCode = payload[0];
-                            if (errorCode == 0) {
-                                mBleDataSetCallback.onDataSendSucceed();
-                            } else {
-                                mBleDataSetCallback.onDataSendFailed(errorCode);
-                            }
+                            mBleDataSetCallback.onResult(errorCode);
                             mBleDataSetCallback = null;
                             break;
 
@@ -339,7 +337,7 @@ public class BleConnect {
                             byte errorCode82 = payload[0];
                             try {
                                 byte[] payloadReal = ByteUtils.subByte(payload, 1, payload.length - 1);
-                                mBleDataChangeCallback.onDataChanged(errorCode82, PayLoadUtils.CMD_DOWN_GET, bytesToRealHexString(payloadReal));
+                                mBleDataGetCallback.onResult(errorCode82, bytesToRealHexString(payloadReal));
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -350,13 +348,13 @@ public class BleConnect {
                             BleLog.d("errorTest" + ByteUtils.toHexStringSplit(payload));
                             byte errorCode84 = payload[0];
                             if (errorCode84 != 0) {
-                                mBleSnapDataChangeCallback.onDataChanged(errorCode84, PayLoadUtils.CMD_DOWN_SNAPSHOT, null);
+                                mBleSnapDataChangeCallback.onResult(errorCode84, null);
                                 return;
                             }
 
                             try {
                                 byte[] payloadReal = ByteUtils.subByte(payload, 1, payload.length - 1);
-                                mBleSnapDataChangeCallback.onDataChanged(0, PayLoadUtils.CMD_DOWN_SNAPSHOT, bytesToRealHexString(payloadReal));
+                                mBleSnapDataChangeCallback.onResult(0, bytesToRealHexString(payloadReal));
 
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -1060,7 +1058,7 @@ public class BleConnect {
     }
 
 
-    public void getSnapshot(XJBleDevice xjBleDevice, BleSnapDataChangeCallback callback) {//不扫描直接认证
+    public void getSnapshot(XJBleDevice xjBleDevice, BleSnapshotGetCallback callback) {//不扫描直接认证
         mBleSnapDataChangeCallback = callback;
         this.xjBleDevice = xjBleDevice;
         SPLIT_WRITE_NUM = xjBleDevice.getMaxSize();//新增查maxSize
@@ -1077,7 +1075,6 @@ public class BleConnect {
             }
         });
     }
-
 
     public synchronized void addConnectGattCallback(BleConnectCallback callback) {
         bleConnectCallback = callback;
@@ -1109,8 +1106,9 @@ public class BleConnect {
         });
     }
 
-    public void getData(byte[] payload) {
+    public void getData(byte[] payload, BleDataGetCallback callback) {
         BleLog.e("oxff:" + (int) 0xFF);
+        mBleDataGetCallback = callback;
         write(payload, PayLoadUtils.CMD_DOWN_GET, new BleWriteCallback() {
             @Override
             public void onWriteSuccess(int current, int total, byte[] justWrite) {

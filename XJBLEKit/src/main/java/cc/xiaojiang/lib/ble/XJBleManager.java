@@ -14,8 +14,9 @@ import java.util.List;
 import cc.xiaojiang.lib.ble.callback.BleAuthCallback;
 import cc.xiaojiang.lib.ble.callback.BleConnectCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataChangeCallback;
+import cc.xiaojiang.lib.ble.callback.BleDataGetCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataSetCallback;
-import cc.xiaojiang.lib.ble.callback.BleSnapDataChangeCallback;
+import cc.xiaojiang.lib.ble.callback.BleSnapshotGetCallback;
 import cc.xiaojiang.lib.ble.callback.BleWifiConfigCallback;
 import cc.xiaojiang.lib.ble.callback.IBleScanCallback;
 import cc.xiaojiang.lib.ble.callback.ota.OtaProgressCallBack;
@@ -75,13 +76,6 @@ public class XJBleManager {
         return context;
     }
 
-    public void setData(byte[] payload, BleDataSetCallback callback) {
-        BleConnect.getInstance().setData(payload, callback);
-    }
-
-    public void getData(byte[] payload) {
-        BleConnect.getInstance().getData(payload);
-    }
 
 
     public void sendApInfoWithSSID(String ssid, String pwd,
@@ -316,9 +310,18 @@ public class XJBleManager {
       BleConnect.getInstance().startAuth(context,xjBleDevice,iBleAuth);
     }
 
-    public void getSnapshot(XJBleDevice xjBleDevice, BleSnapDataChangeCallback callback) {
+    public void getSnapshot(XJBleDevice xjBleDevice, BleSnapshotGetCallback callback) {
         BleConnect.getInstance().getSnapshot(xjBleDevice,callback);
     }
+
+    public void setData(byte[] payload, BleDataSetCallback callback) {
+        BleConnect.getInstance().setData(payload, callback);
+    }
+
+    public void getData(byte[] payload, BleDataGetCallback callback) {
+        BleConnect.getInstance().getData(payload,callback);
+    }
+
 
 
 
