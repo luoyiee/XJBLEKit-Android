@@ -178,7 +178,6 @@ public class BleConnect {
                  * 发现服务
                  */
                 case BleMsg.MSG_DISCOVER_SERVICES:
-                    mBleAuthCallback.onAuthStep(xjBleDevice, BleAuthStep.START.getCode());
                     if (gatt != null) {
                         boolean discoverServiceResult = gatt.discoverServices();
                         if (!discoverServiceResult) {
@@ -223,6 +222,7 @@ public class BleConnect {
                  * indicate
                  */
                 case BleMsg.MSG_CHA_INDICATE_START:
+                    mBleAuthCallback.onAuthStep(xjBleDevice, BleAuthStep.START.getCode());
                     enableIndicate();
                     break;
                 case BleMsg.MSG_CHA_INDICATE_RESULT:
