@@ -37,7 +37,7 @@ import cc.xiaojiang.lib.ble.utils.ByteUtils;
 
 public class XJBleManager {
     public static final int REQUEST_ENABLE_BT = 1;
-    private Application context;
+    private Context mContext;
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothManager bluetoothManager;
     public static BluetoothChangedObserver bleObserver;
@@ -51,12 +51,12 @@ public class XJBleManager {
     private XJBleManager() {
     }
 
-    public void init(Application app) {
-        if (context == null && app != null) {
-            context = app;
+    public void init(Context context) {
+        if (mContext == null && context != null) {
+            mContext = context;
             if (isSupportBle()) {
                 bluetoothManager =
-                        (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+                        (BluetoothManager) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
                 bluetoothAdapter = bluetoothManager.getAdapter();
                 multipleBluetoothController = new MultipleBluetoothController();
 //                BleConnect.getInstance().initController();
@@ -73,7 +73,7 @@ public class XJBleManager {
      * @return
      */
     public Context getContext() {
-        return context;
+        return mContext;
     }
 
 
@@ -153,7 +153,7 @@ public class XJBleManager {
      */
     public void setBleStatusCallback(BleStatusCallback callback) {
         if (bleObserver == null) {
-            bleObserver = new BluetoothChangedObserver(context);
+            bleObserver = new BluetoothChangedObserver(mContext);
             bleObserver.registerReceiver();
         }
         bleObserver.setBleScanCallbackInner(callback);
@@ -167,7 +167,7 @@ public class XJBleManager {
 
     public void setGpsStatusCallback(GpsStatusCallback callback) {
         if (gpsObserver == null) {
-            gpsObserver = new GpsChangedObserver(context);
+            gpsObserver = new GpsChangedObserver(mContext);
             gpsObserver.registerReceiver();
         }
         gpsObserver.setGpsCallbackInner(callback);
@@ -233,7 +233,7 @@ public class XJBleManager {
 
 
     public boolean isSupportBle() {
-        return context.getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+        return mContext.getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
     }
 
     public boolean isBleEnable() {
