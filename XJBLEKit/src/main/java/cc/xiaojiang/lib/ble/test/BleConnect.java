@@ -1041,9 +1041,8 @@ public class BleConnect {
         BleLog.d("OTAData: " + ByteUtils.bytesToHexString(totalBuffer.array()) + ", length: " + totalBuffer.array().length);
     }
 
-    public BluetoothGatt connect(Context context, XJBleDevice xjBleDevice, IBleAuth iBleAuth,
+    public BluetoothGatt connect(Context context, XJBleDevice xjBleDevice,
                                  BleConnectCallback bleConnectCallback) {
-        this.mIBleAuth = iBleAuth;
         this.mContext = context;
         return connect(xjBleDevice, false, bleConnectCallback);
     }
@@ -1051,13 +1050,6 @@ public class BleConnect {
     public void startAuth(Context context, XJBleDevice xjBleDevice, IBleAuth iBleAuth) {//不扫描直接认证
         this.xjBleDevice = xjBleDevice;
         this.mIBleAuth = iBleAuth;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            gatt = xjBleDevice.getDevice().connectGatt(context,
-                    false, coreGattCallback, TRANSPORT_LE);
-        } else {
-            gatt = xjBleDevice.getDevice().connectGatt(context,
-                    false, coreGattCallback);
-        }
         // start indicate, delay 50ms
         Message message = mainHandler.obtainMessage();
         message.what = BleMsg.MSG_CHA_INDICATE_START;
