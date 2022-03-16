@@ -154,7 +154,7 @@ public class BleScanner {
                 }
                 if (mac.equals(bleDevice.getMac())) {
                     stopScan();
-                    BleConnect.getInstance().connect(bleDevice, iBleAuth, bleConnectCallback);
+                    BleConnect.getInstance().connect(XJBleManager.getInstance().getContext(),bleDevice, iBleAuth, bleConnectCallback);
                 }
             }
 
