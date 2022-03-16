@@ -214,10 +214,10 @@ public class BleConnect {
                     if (bleConnectCallback != null) {
                         bleConnectCallback.onConnectSuccess(xjBleDevice, gatt, para1.getStatus());
                     }
-                    //start indicate, delay 50ms
-                    Message message = mainHandler.obtainMessage();
-                    message.what = BleMsg.MSG_CHA_INDICATE_START;
-                    mainHandler.sendMessageDelayed(message, 50);
+//                    //start indicate, delay 50ms
+//                    Message message = mainHandler.obtainMessage();
+//                    message.what = BleMsg.MSG_CHA_INDICATE_START;
+//                    mainHandler.sendMessageDelayed(message, 50);
                     break;
                 /**
                  * indicate
