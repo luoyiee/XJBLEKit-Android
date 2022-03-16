@@ -106,6 +106,7 @@ public class BleConnect {
     public static Handler handler = new Handler(Looper.getMainLooper());
     public boolean isTimeOut = false;
     public byte bleCmd;
+    private Context mContext;
 
     public BleConnect(XJBleDevice xjBleDevice) {
         this.xjBleDevice = xjBleDevice;
@@ -624,10 +625,10 @@ public class BleConnect {
         SPLIT_WRITE_NUM = xjBleDevice.getMaxSize();//新增查maxSize
         lastState = LastState.CONNECT_CONNECTING;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            gatt = xjBleDevice.getDevice().connectGatt(XJBleManager.getInstance().getContext(),
+            gatt = xjBleDevice.getDevice().connectGatt(mContext,
                     autoConnect, coreGattCallback, TRANSPORT_LE);
         } else {
-            gatt = xjBleDevice.getDevice().connectGatt(XJBleManager.getInstance().getContext(),
+            gatt = xjBleDevice.getDevice().connectGatt(mContext,
                     autoConnect, coreGattCallback);
         }
 
@@ -1040,10 +1041,11 @@ public class BleConnect {
         BleLog.d("OTAData: " + ByteUtils.bytesToHexString(totalBuffer.array()) + ", length: " + totalBuffer.array().length);
     }
 
-    public BluetoothGatt connect(XJBleDevice XJBleDevice, IBleAuth iBleAuth,
+    public BluetoothGatt connect(Context context, XJBleDevice xjBleDevice, IBleAuth iBleAuth,
                                  BleConnectCallback bleConnectCallback) {
         this.mIBleAuth = iBleAuth;
-        return connect(XJBleDevice, false, bleConnectCallback);
+        this.mContext = context;
+        return connect(xjBleDevice, false, bleConnectCallback);
     }
 
     public void startAuth(Context context, XJBleDevice xjBleDevice, IBleAuth iBleAuth) {//不扫描直接认证
