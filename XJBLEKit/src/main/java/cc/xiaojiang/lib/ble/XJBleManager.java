@@ -295,11 +295,10 @@ public class XJBleManager {
         return multipleBluetoothController;
     }
 
-    public BluetoothGatt connect(XJBleDevice XJBleDevice, IBleAuth iBleAuth,
+    public BluetoothGatt connect(XJBleDevice xjBleDevice, IBleAuth iBleAuth,
                                  BleConnectCallback bleConnectCallback) {
-        return BleConnect.getInstance().connect(XJBleDevice, iBleAuth, bleConnectCallback);
+        return BleConnect.getInstance().connect(xjBleDevice, iBleAuth, bleConnectCallback);
     }
-
 
     public BluetoothGatt connect(String mac, IBleAuth iBleAuth,
                                  BleConnectCallback bleConnectCallback) {

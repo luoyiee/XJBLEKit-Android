@@ -15,22 +15,12 @@ public class XJBleDevice implements Parcelable {
     private BluetoothDevice device;
     private ManufacturerData manufacturerData = new ManufacturerData();
     private int rssi = 0;
-
     private String id = "";
     private String platform = "";
-    private String random = "";
     private BluetoothDevice mDevice; // 扫描到的设备实例
 
     public XJBleDevice(BluetoothDevice device) {
         mDevice = device;
-    }
-
-    public String getRandom() {
-        return random;
-    }
-
-    public void setRandom(String random) {
-        this.random = random;
     }
 
     public XJBleDevice() {
@@ -108,7 +98,6 @@ public class XJBleDevice implements Parcelable {
         dest.writeParcelable(this.manufacturerData, flags);
         dest.writeInt(this.rssi);
         dest.writeString(this.platform);
-        dest.writeString(this.random);
     }
 
     public void readFromParcel(Parcel source) {
@@ -116,7 +105,6 @@ public class XJBleDevice implements Parcelable {
         this.manufacturerData = source.readParcelable(ManufacturerData.class.getClassLoader());
         this.rssi = source.readInt();
         this.platform = source.readString();
-        this.random = source.readString();
     }
 
     protected XJBleDevice(Parcel in) {
@@ -124,7 +112,6 @@ public class XJBleDevice implements Parcelable {
         this.manufacturerData = in.readParcelable(ManufacturerData.class.getClassLoader());
         this.rssi = in.readInt();
         this.platform = in.readString();
-        this.random = in.readString();
     }
 
     public static final Creator<XJBleDevice> CREATOR = new Creator<XJBleDevice>() {

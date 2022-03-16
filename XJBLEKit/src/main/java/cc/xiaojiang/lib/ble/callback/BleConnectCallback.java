@@ -6,15 +6,10 @@ import cc.xiaojiang.lib.ble.XJBleDevice;
 import cc.xiaojiang.lib.ble.exception.BleException;
 
 public interface BleConnectCallback {
-    public abstract void onStartConnect();
+    void onConnectSuccess(XJBleDevice XJBleDevice, BluetoothGatt gatt, int status);
 
-    public abstract void onDeviceScanned(XJBleDevice XJBleDevice);
+    void onConnectFail(XJBleDevice XJBleDevice, BleException exception);
 
-    public abstract void onConnectSuccess(XJBleDevice XJBleDevice, BluetoothGatt gatt, int status);
-
-    public abstract void onConnectFail(XJBleDevice XJBleDevice, BleException exception);
-
-    //    public abstract void onConnected(BleDevice bleDevice, BluetoothGatt gatt, int status);
-    public abstract void onDisConnected(boolean isActiveDisConnected, XJBleDevice XJBleDevice,
-                                        BluetoothGatt bluetoothGatt, int status);
+    void onDisConnected(XJBleDevice XJBleDevice,
+                        BluetoothGatt bluetoothGatt, int status);
 }

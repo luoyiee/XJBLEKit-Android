@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Map;
 
 import cc.xiaojiang.lib.ble.XJBleDevice;
 import cc.xiaojiang.lib.ble.utils.ByteUtils;
@@ -16,7 +17,8 @@ public class ManufacturerData implements Parcelable {
     private byte FMSK;
     private String pid = "", did = "", scanId = "";
     private boolean isSupportOta = false, secretAuthEnable = false, safeBroadcast = false, isBound = false,broadcastFeatureFlag=false,otaEnable=false;
-
+    Map<Object, Object> map;
+    boolean tmAuth = false;
     public ManufacturerData() {
     }
 
@@ -29,9 +31,21 @@ public class ManufacturerData implements Parcelable {
         subType = ByteUtils.getHeight4(versionSubtype);
         FMSK = manufacturerSpecificDataBuffer.get();//1字节
         pid = ByteUtils.getUnsignedInt(manufacturerSpecificDataBuffer.getInt()) + "";//4字节
+        map = BleScanner.getInstance().productMap;
+        if (XJBleDevice.PLATFORM_AL.equals(platform)) {
+            if (map.get(pid) != null) {
+                pid = String.valueOf(map.get(pid));
+                tmAuth = true;
+            } else {
+                tmAuth = false;
+            }
+        }
         bleVersion = FMSK & 0b00000011;//2
         isSupportOta = ((FMSK >> 2) & 0b00000001) == 1;//1
         secretAuthEnable = ((FMSK >> 3) & 0b00000001) == 1;//1
+        if (XJBleDevice.PLATFORM_AL.equals(platform)) {
+            secretAuthEnable = tmAuth;
+        }
         secretType = ((FMSK >> 4) & 0b00000001);//1
         safeBroadcast = ((FMSK >> 5) & 0b00000001) == 1;//1
         isBound = ((FMSK >> 6) & 0b00000001) == 1;//1
@@ -46,20 +60,13 @@ public class ManufacturerData implements Parcelable {
                 did.append(String.format("%02x",
                         ByteUtils.getUnsignedByte(didOrMac[i])));
             } else {
-                int i1 = Integer.parseInt(String.valueOf(didOrMac[i]));
-                if (!secretAuthEnable) {
-                    if (secretType == 0) {//一型一密
-                        scanId = scanId.append(String.format("%02x", ByteUtils.getUnsignedByte(didOrMac[i])));
-                    } else {
-                        scanId = scanId.append((char) i1);
-                    }
-                }
-                did.append((char) i1);
+                did.append((char) Integer.parseInt(String.valueOf(didOrMac[i])));
             }
         }
 
         this.did = did.toString();
         this.scanId = scanId.toString();
+
     }
 
     @Override
