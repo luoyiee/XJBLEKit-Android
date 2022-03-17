@@ -118,7 +118,7 @@ public class XJBleManager {
     public void setData(XJBleDevice bleDevice, byte[] payload, BleDataSetCallback callback) {
         BleBluetooth bleBluetooth = DeviceReady(bleDevice);
         if (bleBluetooth == null) {
-            callback.onDataSendFailed(1);
+            callback.onResult(1);
             return;
         }
         bleBluetooth.setData(payload, callback);
