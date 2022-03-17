@@ -137,9 +137,8 @@ public class BleBluetooth {
         return gatt;
     }
 
-    public BluetoothGatt connect(XJBleDevice bleDevice, IBleAuth iBleAuth,
+    public BluetoothGatt connect(XJBleDevice bleDevice,
                                  BleConnectCallback bleConnectCallback) {
-        this.mIBleAuth = iBleAuth;
         this.bleDevice = bleDevice;
         SPLIT_WRITE_NUM = bleDevice.getMaxSize();
         needAuth = bleDevice.getManufacturerData().isSecretAuthEnable();

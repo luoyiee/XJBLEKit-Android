@@ -176,9 +176,9 @@ public class BleScanner {
         startLeScan(iBleScanCallback);
     }
 
-    public BluetoothGatt scanAndConnect(final String mac, final IBleAuth iBleAuth,
+    public BluetoothGatt scanAndConnect(final String mac,
                                         final BleConnectCallback bleConnectCallback) {
-        if (TextUtils.isEmpty(mac) || iBleAuth == null || bleConnectCallback == null) {
+        if (TextUtils.isEmpty(mac) || bleConnectCallback == null) {
             Log.d("H5", "scanAndConnect null");
             return null;
         }
@@ -196,7 +196,7 @@ public class BleScanner {
                 }
                 if (mac.equals(bleDevice.getMac())) {
                     stopScan();
-                    XJBleManager.getInstance().connect(bleDevice, iBleAuth, bleConnectCallback);
+                    XJBleManager.getInstance().connect(bleDevice, bleConnectCallback);
                 }
             }
 

@@ -402,7 +402,7 @@ public class XJBleManager {
         return multipleBluetoothController;
     }
 
-    public BluetoothGatt connect(XJBleDevice bleDevice, IBleAuth iBleAuth,
+    public BluetoothGatt connect(XJBleDevice bleDevice,
                                  BleConnectCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("BleGattCallback can not be Null!");
@@ -415,13 +415,13 @@ public class XJBleManager {
             callback.onConnectFail(bleDevice, new OtherException("Not Found Device Exception Occurred!"));
         } else {
             BleBluetooth bleBluetooth = multipleBluetoothController.buildConnectingBle(bleDevice);
-            return bleBluetooth.connect(bleDevice, iBleAuth, callback);
+            return bleBluetooth.connect(bleDevice, callback);
         }
         return null;
     }
 
 
-    public void connect(String mac, IBleAuth iBleAuth,
+    public void connect(String mac,
                         BleConnectCallback bleConnectCallback) {
         if (newTimer != null) {
             newTimer.cancel();
@@ -436,19 +436,19 @@ public class XJBleManager {
                 public void run() {
                     newTimer = null;
                     Log.d("H5", "startLeScan+ timeInterval" + timeInterval + "current" + System.currentTimeMillis() + "scanTime" + lastScanTimeNew);
-                    startConnect(mac, iBleAuth, bleConnectCallback);
+                    startConnect(mac, bleConnectCallback);
                 }
             }, SCAN_INTERNAL - timeInterval);
             return;
         }
 
-        startConnect(mac, iBleAuth, bleConnectCallback);
+        startConnect(mac, bleConnectCallback);
     }
 
-    public BluetoothGatt startConnect(String mac, IBleAuth iBleAuth,
+    public BluetoothGatt startConnect(String mac,
                                       BleConnectCallback bleConnectCallback) {
         lastScanTimeNew = System.currentTimeMillis();
-        return BleScanner.getInstance().scanAndConnect(mac, iBleAuth, bleConnectCallback);
+        return BleScanner.getInstance().scanAndConnect(mac, bleConnectCallback);
     }
 
     public boolean isConnected(XJBleDevice bleDevice) {
