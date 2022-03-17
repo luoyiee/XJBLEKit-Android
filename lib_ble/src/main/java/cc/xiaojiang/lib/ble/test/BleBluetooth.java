@@ -171,9 +171,6 @@ public class BleBluetooth {
                     autoConnect, coreGattCallback);
         }
         if (gatt != null) {
-            if (bleConnectCallback != null) {
-                bleConnectCallback.onStartConnect();
-            }
             Message message = mainHandler.obtainMessage();
             message.what = BleMsg.MSG_CONNECT_OVER_TIME;
             mainHandler.sendMessageDelayed(message, XJBleManager.getInstance().getConnectOverTime());
@@ -270,7 +267,7 @@ public class BleBluetooth {
                     boolean isActive = para.isActive();
                     int status = para.getStatus();
                     if (bleConnectCallback != null)
-                        bleConnectCallback.onDisConnected(isActive, bleDevice, gatt, status);
+                        bleConnectCallback.onDisConnected(bleDevice, gatt, status);
                     if (gatt != null) {
                         gatt.close();
                         gatt = null;
