@@ -7,4 +7,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "XJDataTest-android"
-include ':XJBLEKit'
+include ':lib_ble'

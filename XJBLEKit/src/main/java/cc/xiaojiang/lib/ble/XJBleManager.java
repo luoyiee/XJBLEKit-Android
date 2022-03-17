@@ -321,9 +321,6 @@ public class XJBleManager {
         BleConnect.getInstance().getData(payload,callback);
     }
 
-
-
-
     public boolean isConnectedWithDevice(XJBleDevice XJBleDevice) {
         return getConnectState(XJBleDevice) == BluetoothProfile.STATE_CONNECTED;
     }
