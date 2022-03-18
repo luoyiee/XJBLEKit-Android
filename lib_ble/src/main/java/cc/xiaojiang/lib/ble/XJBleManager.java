@@ -21,6 +21,7 @@ import cc.xiaojiang.lib.ble.callback.BleConnectCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataChangeCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataGetCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataSetCallback;
+import cc.xiaojiang.lib.ble.callback.BleDisConnectCallback;
 import cc.xiaojiang.lib.ble.callback.BleSnapshotGetCallback;
 import cc.xiaojiang.lib.ble.callback.BleWifiConfigCallback;
 import cc.xiaojiang.lib.ble.callback.IBleScanCallback;
@@ -522,6 +523,12 @@ public class XJBleManager {
     public void disconnect(XJBleDevice bleDevice) {
         if (multipleBluetoothController != null) {
             multipleBluetoothController.disconnect(bleDevice);
+        }
+    }
+
+    public void disconnect(XJBleDevice bleDevice, BleDisConnectCallback callback) {
+        if (multipleBluetoothController != null) {
+            multipleBluetoothController.disconnectWithCallback(bleDevice,callback);
         }
     }
 

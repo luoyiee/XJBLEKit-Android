@@ -40,6 +40,7 @@ import cc.xiaojiang.lib.ble.callback.BleConnectCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataChangeCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataGetCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataSetCallback;
+import cc.xiaojiang.lib.ble.callback.BleDisConnectCallback;
 import cc.xiaojiang.lib.ble.callback.BleSnapshotGetCallback;
 import cc.xiaojiang.lib.ble.callback.BleWifiConfigCallback;
 import cc.xiaojiang.lib.ble.callback.BleWriteCallback;
@@ -70,6 +71,7 @@ public class BleBluetooth {
     private BluetoothGatt gatt;
     private OtaInfo.ContentBean.ModuleBean mInfo = new OtaInfo.ContentBean.ModuleBean();
     private BleConnectCallback bleConnectCallback;
+    private BleDisConnectCallback mBleDisConnectCallback;
     private BleWriteCallback bleWriteCallback;
     private SendResultCallBack sendResultCallBack;
     private BleDataSetCallback mBleDataSetCallback;
@@ -187,6 +189,12 @@ public class BleBluetooth {
         return gatt;
     }
 
+    public synchronized void disconnectWithCallback(BleDisConnectCallback callback) {
+        this.mBleDisConnectCallback = callback;
+        isActiveDisconnect = true;
+        disconnectGatt();
+    }
+
     public synchronized void disconnect() {
         isActiveDisconnect = true;
         disconnectGatt();
@@ -267,6 +275,10 @@ public class BleBluetooth {
                     int status = para.getStatus();
                     if (bleConnectCallback != null)
                         bleConnectCallback.onDisConnected(bleDevice, gatt, status);
+
+                    if (mBleDisConnectCallback != null) {
+                        mBleDisConnectCallback.onResult(BluetoothGatt.GATT_SUCCESS);
+                    }
                     if (gatt != null) {
                         gatt.close();
                         gatt = null;
