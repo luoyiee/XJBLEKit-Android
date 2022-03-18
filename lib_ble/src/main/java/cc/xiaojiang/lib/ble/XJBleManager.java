@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Looper;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
@@ -411,6 +412,9 @@ public class XJBleManager {
         if (!isBleEnable()) {
             callback.onConnectFail(bleDevice, new OtherException("Bluetooth not enable!"));
             return null;
+        }
+        if (Looper.myLooper() == null || Looper.myLooper() != Looper.getMainLooper()) {
+            BleLog.w("Be careful: currentThread is not MainThread!");
         }
         if (bleDevice == null || bleDevice.getDevice() == null) {
             callback.onConnectFail(bleDevice, new OtherException("Not Found Device Exception Occurred!"));
