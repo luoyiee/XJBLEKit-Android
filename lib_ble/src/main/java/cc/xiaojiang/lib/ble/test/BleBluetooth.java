@@ -989,6 +989,7 @@ public class BleBluetooth {
     }
 
     public void getSnapshot(BleSnapshotGetCallback callback) {
+        mBleSnapshotGetCallback = callback;
         write(new byte[]{(byte) 0x00}, (byte) 0x84, new BleWriteCallback() {
             @Override
             public void onWriteSuccess(int current, int total, byte[] justWrite) {
