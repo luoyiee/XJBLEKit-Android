@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 
 
 import java.lang.reflect.Method;
@@ -229,9 +230,11 @@ public class BleBluetooth {
     }
 
     private synchronized void closeBluetoothGatt() {
-        if (gatt != null) {
-            gatt.close();
+        if (gatt == null) {
+            return;
         }
+        gatt.close();
+        gatt = null;
     }
 
     private final class MainHandler extends Handler {
@@ -275,13 +278,12 @@ public class BleBluetooth {
                     int status = para.getStatus();
                     if (bleConnectCallback != null)
                         bleConnectCallback.onDisConnected(bleDevice, gatt, status);
-
-                    if (mBleDisConnectCallback != null) {
-                        mBleDisConnectCallback.onResult(BluetoothGatt.GATT_SUCCESS);
-                    }
                     if (gatt != null) {
                         gatt.close();
                         gatt = null;
+                    }
+                    if (mBleDisConnectCallback != null) {
+                        mBleDisConnectCallback.onResult(BluetoothGatt.GATT_SUCCESS);
                     }
                 }
                 break;
