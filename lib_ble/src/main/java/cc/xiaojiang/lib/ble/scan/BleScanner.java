@@ -43,7 +43,7 @@ public class BleScanner {
     private BluetoothLeScanner bluetoothLeScanner;
     private IBleScanCallback iBleScanCallback;
     private String autoConnectMac = "";
-    public Map<Object, Object> productMap;
+    public Map<Object, Object> productMap = new HashMap<>();
     private static final BleScanner ourInstance = new BleScanner();
 
     private BleScanner() {

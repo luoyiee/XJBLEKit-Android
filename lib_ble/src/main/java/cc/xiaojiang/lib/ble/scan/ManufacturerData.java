@@ -32,6 +32,9 @@ public class ManufacturerData implements Parcelable {
         subType = ByteUtils.getHeight4(versionSubtype);
         FMSK = manufacturerSpecificDataBuffer.get();//1字节
         pid = ByteUtils.getUnsignedInt(manufacturerSpecificDataBuffer.getInt()) + "";//4字节
+
+
+
         map = BleScanner.getInstance().productMap;
         if (XJBleDevice.PLATFORM_AL.equals(platform)) {
             if (map.get(pid) != null) {
