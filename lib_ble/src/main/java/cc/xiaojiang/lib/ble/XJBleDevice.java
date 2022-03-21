@@ -48,7 +48,6 @@ public class XJBleDevice implements Parcelable {
     }
 
 
-
     @Override
     public int describeContents() {
         return 0;
@@ -103,16 +102,13 @@ public class XJBleDevice implements Parcelable {
 
 
     public int getMaxSize() {
-        int size = 0;
         switch (getManufacturerData().getBleVersion()) {
             case 0:
-                size = 20;
-                break;
+                return 20;
             case 1:
             case 2:
-                size = 244;
-                break;
+                return 244;
         }
-        return size;
+        return 0;
     }
 }
