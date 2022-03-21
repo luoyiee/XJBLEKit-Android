@@ -136,7 +136,6 @@ public class XJBleManager {
         bleBluetooth.getData(payload,callback);
     }
 
-
     public void sendApInfoWithSSID(XJBleDevice bleDevice, String ssid, String pwd,
                                    String token, String url, BleWifiConfigCallback callback) {
         byte[] ssidBytes = PayLoadUtils.getStringPayload(PayLoadUtils.ATTR_ID_SSID, ssid);
@@ -382,8 +381,7 @@ public class XJBleManager {
         }
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
         // BluetoothAdapter through BluetoothManager.
-        final BluetoothManager bluetoothManager =
-                (BluetoothManager) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
+        final BluetoothManager bluetoothManager = (BluetoothManager) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
         return bluetoothManager.getAdapter();
     }
 

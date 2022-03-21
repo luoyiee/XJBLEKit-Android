@@ -41,9 +41,7 @@ public class MultipleBluetoothController {
         if (bleBluetooth == null) {
             return;
         }
-        if (bleTempHashMap.containsKey(bleBluetooth.getDeviceKey())) {
-            bleTempHashMap.remove(bleBluetooth.getDeviceKey());
-        }
+        bleTempHashMap.remove(bleBluetooth.getDeviceKey());
     }
 
     public synchronized void addBleBluetooth(BleBluetooth bleBluetooth) {
@@ -59,9 +57,7 @@ public class MultipleBluetoothController {
         if (bleBluetooth == null) {
             return;
         }
-        if (bleLruHashMap.containsKey(bleBluetooth.getDeviceKey())) {
-            bleLruHashMap.remove(bleBluetooth.getDeviceKey());
-        }
+        bleLruHashMap.remove(bleBluetooth.getDeviceKey());
     }
 
     public synchronized boolean isContainDevice(XJBleDevice bleDevice) {
@@ -81,7 +77,6 @@ public class MultipleBluetoothController {
         }
         return null;
     }
-//
 
     /**
      * 断开蓝牙设备的连接
@@ -129,7 +124,6 @@ public class MultipleBluetoothController {
         bleTempHashMap.clear();
     }
 
-    //
     private synchronized List<BleBluetooth> getBleBluetoothList() {
         List<BleBluetooth> bleBluetoothList = new ArrayList<>(bleLruHashMap.values());
         Collections.sort(bleBluetoothList, (lhs, rhs) -> lhs.getDeviceKey().compareToIgnoreCase(rhs.getDeviceKey()));

@@ -8,7 +8,7 @@ public interface BleAuthCallback {
 
     void onAuthSuccess(XJBleDevice var1);
 
-    void onAuthFail(XJBleDevice var1, AuthException var2);
+    void onAuthFail(XJBleDevice var1, int errorCode);
 
 
 }

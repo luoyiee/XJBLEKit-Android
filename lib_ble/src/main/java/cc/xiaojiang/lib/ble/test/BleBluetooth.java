@@ -7,6 +7,10 @@ import static cc.xiaojiang.lib.ble.Constants.UUID_XJ_CHARACTERISTIC_NOTIFY;
 import static cc.xiaojiang.lib.ble.Constants.UUID_XJ_CHARACTERISTIC_WRITE;
 import static cc.xiaojiang.lib.ble.Constants.UUID_XJ_CHARACTERISTIC_WRITE_WITH_NO_RESPONSE;
 import static cc.xiaojiang.lib.ble.Constants.UUID_XJ_SERVICE;
+import static cc.xiaojiang.lib.ble.exception.AuthException.ERROR_DISCOVER_FAIL;
+import static cc.xiaojiang.lib.ble.exception.AuthException.ERROR_GET_BLE_KEY;
+import static cc.xiaojiang.lib.ble.exception.AuthException.ERROR_GET_RANDOM_FAIL;
+import static cc.xiaojiang.lib.ble.exception.AuthException.NO_ERROR;
 import static cc.xiaojiang.lib.ble.utils.ByteUtils.bytesToRealHexString;
 
 import android.bluetooth.BluetoothGatt;
@@ -319,30 +323,16 @@ public class BleBluetooth {
                 break;
 
                 case BleMsg.MSG_DISCOVER_FAIL: {
-                    disconnect();
-                    refreshDeviceCache();
-                    closeBluetoothGatt();
-                    lastState = LastState.CONNECT_FAILURE;
-                    XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleBluetooth.this);
-
-                    if (bleConnectCallback != null)
-                        bleConnectCallback.onConnectFail(bleDevice,
-                                new OtherException("GATT discover services exception occurred!"));
+                    if (mBleAuthCallback != null) {
+                        mBleAuthCallback.onAuthFail(bleDevice, ERROR_DISCOVER_FAIL);
+                    }
                 }
                 break;
 
                 case BleMsg.MSG_DISCOVER_SUCCESS: {
-                    lastState = LastState.CONNECT_CONNECTED;
-                    isActiveDisconnect = false;
-                    mAuthed = false;
-                    XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleBluetooth.this);
-                    XJBleManager.getInstance().getMultipleBluetoothController().addBleBluetooth(BleBluetooth.this);
-
-                    BleConnectStateParameter para = (BleConnectStateParameter) msg.obj;
-                    int status = para.getStatus();
-                    if (bleConnectCallback != null) {
-                        bleConnectCallback.onConnectSuccess(bleDevice, gatt, status);
-                    }
+                    Message message = mainHandler.obtainMessage();
+                    message.what = BleMsg.MSG_CHA_INDICATE_START;
+                    mainHandler.sendMessageDelayed(message, 50);
                 }
                 break;
 
@@ -374,7 +364,7 @@ public class BleBluetooth {
                             new Thread(() -> {
                                 String random = mIBleAuth.getRandom(bleDevice);
                                 if (TextUtils.isEmpty(random)) {
-                                    onAuthResult(false);
+                                    onAuthResult(false, ERROR_GET_RANDOM_FAIL);
                                     return;
                                 }
                                 sendRandom(mIBleAuth.getRandom(bleDevice));
@@ -388,19 +378,6 @@ public class BleBluetooth {
                             mBleAuthCallback.onAuthStep(bleDevice, BleAuthStep.READY.getCode());
                         }
                     }
-                    break;
-                /**
-                 * auth
-                 */
-                case BleMsg.MSG_AUTH_RANDOM:
-                    new Thread(() -> {
-                        String random = mIBleAuth.getRandom(bleDevice);
-                        if (TextUtils.isEmpty(random)) {
-                            onAuthResult(false);
-                            return;
-                        }
-                        sendRandom(mIBleAuth.getRandom(bleDevice));
-                    }).start();
                     break;
                 case BleMsg.MSG_CHA_INDICATE_DATA_CHANGE:
                     handler.removeCallbacks(sendDelayRun);
@@ -428,11 +405,11 @@ public class BleBluetooth {
                                         bleKey = mIBleAuth.getBleKey(bleDevice,
                                                 cipher.toUpperCase());
                                         if (TextUtils.isEmpty(bleKey)) {
-                                            onAuthResult(false);
+                                            onAuthResult(false, ERROR_GET_BLE_KEY);
                                             return;
                                         }
                                         BleLog.d("get ble key: " + bleKey);
-
+                                        onAuthResult(true, NO_ERROR);
                                         Message message = mainHandler.obtainMessage();
                                         message.what = BleMsg.MSG_AUTH_SUCCEED;
                                         mainHandler.sendMessage(message);
@@ -663,13 +640,13 @@ public class BleBluetooth {
                     }
                     break;
 
-                case BleMsg.MSG_AUTH_SUCCEED://
-                    onAuthResult(true);
-                    break;
-
-                case BleMsg.MSG_AUTH_FAILED://
-                    onAuthResult(false);
-                    break;
+//                case BleMsg.MSG_AUTH_SUCCEED://
+//                    onAuthResult(true);
+//                    break;
+//
+//                case BleMsg.MSG_AUTH_FAILED://
+//                    onAuthResult(false);
+//                    break;
 
                 case BleMsg.MSG_OTA_VERSION_SUCCEED://
 //                    mOtaVersionCallback.onVersionSucceed(mOtaInfo);
@@ -691,7 +668,6 @@ public class BleBluetooth {
     }
 
     private BluetoothGattCallback coreGattCallback = new BluetoothGattCallback() {
-
         @Override
         public void onConnectionStateChange(BluetoothGatt bluetoothGatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
@@ -699,31 +675,41 @@ public class BleBluetooth {
                     + '\n' + "status: " + status
                     + '\n' + "newState: " + newState
                     + '\n' + "currentThread: " + Thread.currentThread().getId());
-
             gatt = bluetoothGatt;
-
             mainHandler.removeMessages(BleMsg.MSG_CONNECT_OVER_TIME);
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                if (newState == BluetoothProfile.STATE_CONNECTED) {
+                    lastState = LastState.CONNECT_CONNECTED;
+                    isActiveDisconnect = false;
+                    mAuthed = false;
+                    XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleBluetooth.this);
+                    XJBleManager.getInstance().getMultipleBluetoothController().addBleBluetooth(BleBluetooth.this);
+                    if (bleConnectCallback != null) {
+                        bleConnectCallback.onConnectSuccess(bleDevice, gatt, status);
+                    }
+                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                    if (lastState == LastState.CONNECT_CONNECTING) {
+                        Message message = mainHandler.obtainMessage();
+                        message.what = BleMsg.MSG_CONNECT_FAIL;
+                        message.obj = new BleConnectStateParameter(status);
+                        mainHandler.sendMessage(message);
 
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                Message message = mainHandler.obtainMessage();
-                message.what = BleMsg.MSG_DISCOVER_SERVICES;
-                mainHandler.sendMessageDelayed(message, 500);
-
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                if (lastState == LastState.CONNECT_CONNECTING) {
-                    Message message = mainHandler.obtainMessage();
-                    message.what = BleMsg.MSG_CONNECT_FAIL;
-                    message.obj = new BleConnectStateParameter(status);
-                    mainHandler.sendMessage(message);
-
-                } else if (lastState == LastState.CONNECT_CONNECTED) {
-                    Message message = mainHandler.obtainMessage();
-                    message.what = BleMsg.MSG_DISCONNECTED;
-                    BleConnectStateParameter para = new BleConnectStateParameter(status);
-                    para.setActive(isActiveDisconnect);
-                    message.obj = para;
-                    mainHandler.sendMessage(message);
+                    } else if (lastState == LastState.CONNECT_CONNECTED) {
+                        Message message = mainHandler.obtainMessage();
+                        message.what = BleMsg.MSG_DISCONNECTED;
+                        BleConnectStateParameter para = new BleConnectStateParameter(status);
+                        para.setActive(isActiveDisconnect);
+                        message.obj = para;
+                        mainHandler.sendMessage(message);
+                    }
                 }
+            } else {// 防止出现status 133
+                Log.d("H5", "防止出现status" + status);
+                Message message = mainHandler.obtainMessage();
+                message.what = BleMsg.MSG_DISCONNECTED;
+                message.arg1 = status;
+                message.obj = new BleConnectStateParameter(status);
+                mainHandler.sendMessage(message);
             }
         }
 
@@ -1252,7 +1238,7 @@ public class BleBluetooth {
         }
     }
 
-    private void onAuthResult(boolean isSucceed) {
+    private void onAuthResult(boolean isSucceed, int errorCode) {
         if (mBleAuthCallback == null) {
             return;
         }
@@ -1262,7 +1248,7 @@ public class BleBluetooth {
             mBleAuthCallback = null;
         } else {
             mAuthed = false;
-            this.mBleAuthCallback.onAuthFail(this.bleDevice, new AuthException());
+            this.mBleAuthCallback.onAuthFail(this.bleDevice, errorCode);
         }
         removeAuthStateListener();
     }
@@ -1293,7 +1279,7 @@ public class BleBluetooth {
         this.mIBleAuth = iBleAuth;
         // start indicate, delay 50ms
         Message message = mainHandler.obtainMessage();
-        message.what = BleMsg.MSG_CHA_INDICATE_START;
+        message.what = BleMsg.MSG_DISCOVER_SERVICES;
         mainHandler.sendMessageDelayed(message, 50);
     }
 
