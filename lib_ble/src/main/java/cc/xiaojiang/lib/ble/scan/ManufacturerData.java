@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.HashMap;
 import java.util.Map;
 
 import cc.xiaojiang.lib.ble.XJBleDevice;
@@ -15,20 +16,14 @@ import lombok.Data;
 public class ManufacturerData implements Parcelable {
     private int version = 0, subType = 0, bleVersion = 0, secretType = 0, cid = 0, authStep = 0;
     private byte FMSK;
-    private String pid = "";
-    private String did = "";
-    private String scanId = "";
+    private String pid = "", did = "", platform = "";
     private boolean isSupportOta = false;
     private boolean secretAuthEnable = false;
     private boolean safeBroadcast = false;
     private boolean isBound = false;
     private boolean broadcastFeatureFlag = false;
     private boolean otaEnable = false;
-    Map<Object, Object> map;
-
-
-    boolean tmAuth = false;
-    private String platform = "";
+    Map<Object, Object> map = new HashMap<>();
 
     public ManufacturerData() {
     }
@@ -84,7 +79,6 @@ public class ManufacturerData implements Parcelable {
                 ", subType=" + subType +
                 ", FMSK=" + FMSK +
                 ", pid=" + pid +
-                ", scanId=" + scanId +
                 ", did='" + did + '\'' +
                 ", bleVersion=" + bleVersion +
                 ", isSupportOta=" + isSupportOta +
