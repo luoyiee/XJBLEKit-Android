@@ -2,7 +2,9 @@ package cc.xiaojiang.lib.ble.exception;
 
 import java.io.Serializable;
 
+import lombok.Data;
 
+@Data
 public class BleSendException implements Serializable {
     private static final byte NO_ERR = 0x00;
     private static final byte ERR_system = 0x01;

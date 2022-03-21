@@ -19,7 +19,7 @@ public class XJBleDevice implements Parcelable {
     private String id = "";
     private String platform = "";
     private String random = "";
-    private String cid;
+    private int cid;
     private BluetoothDevice mDevice; // 扫描到的设备实例
 
     public XJBleDevice(BluetoothDevice device) {
@@ -28,6 +28,7 @@ public class XJBleDevice implements Parcelable {
 
     public XJBleDevice() {
     }
+
     public String getKey() {
         if (device != null)
             return device.getName() + device.getAddress();
@@ -45,6 +46,7 @@ public class XJBleDevice implements Parcelable {
             return device.getAddress();
         return null;
     }
+
 
 
     @Override

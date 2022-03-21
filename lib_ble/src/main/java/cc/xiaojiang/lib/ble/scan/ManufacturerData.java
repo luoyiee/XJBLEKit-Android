@@ -15,16 +15,43 @@ import lombok.Data;
 public class ManufacturerData implements Parcelable {
     private int version = 0, subType = 0, bleVersion = 0, secretType = 0, cid = 0, authStep = 0;
     private byte FMSK;
-    private String pid = "", did = "", scanId = "";
-    private boolean isSupportOta = false, secretAuthEnable = false, safeBroadcast = false, isBound = false,broadcastFeatureFlag=false,otaEnable=false;
+    private String pid = "";
+    private String did = "";
+    private String scanId = "";
+    private boolean isSupportOta = false;
+    private boolean secretAuthEnable = false;
+    private boolean safeBroadcast = false;
+    private boolean isBound = false;
+    private boolean broadcastFeatureFlag = false;
+    private boolean otaEnable = false;
     Map<Object, Object> map;
+
+
     boolean tmAuth = false;
+    private String platform = "";
 
     public ManufacturerData() {
     }
 
+    public String getPid() {
+        if (XJBleDevice.PLATFORM_AL.equals(platform)) {
+            if (map.get(pid) != null) {
+                return String.valueOf(map.get(pid));
+            }
+        }
+        return pid;
+    }
+
+    public boolean isSecretAuthEnable() {
+        if (map.get(pid) != null) {
+            return true;
+        }
+        return secretAuthEnable;
+    }
+
     public ManufacturerData(byte[] manufacturerSpecificData, String platform) {
         //解析广播数据
+        this.platform = platform;
         ByteBuffer manufacturerSpecificDataBuffer = ByteBuffer.wrap(manufacturerSpecificData);
         manufacturerSpecificDataBuffer.order(ByteOrder.LITTLE_ENDIAN);
         byte versionSubtype = manufacturerSpecificDataBuffer.get();//1字节
@@ -32,24 +59,10 @@ public class ManufacturerData implements Parcelable {
         subType = ByteUtils.getHeight4(versionSubtype);
         FMSK = manufacturerSpecificDataBuffer.get();//1字节
         pid = ByteUtils.getUnsignedInt(manufacturerSpecificDataBuffer.getInt()) + "";//4字节
-
-
-
         map = BleScanner.getInstance().productMap;
-        if (XJBleDevice.PLATFORM_AL.equals(platform)) {
-            if (map.get(pid) != null) {
-                pid = String.valueOf(map.get(pid));
-                tmAuth = true;
-            } else {
-                tmAuth = false;
-            }
-        }
         bleVersion = FMSK & 0b00000011;//2
         isSupportOta = ((FMSK >> 2) & 0b00000001) == 1;//1
         secretAuthEnable = ((FMSK >> 3) & 0b00000001) == 1;//1
-        if (XJBleDevice.PLATFORM_AL.equals(platform)) {
-            secretAuthEnable = tmAuth;
-        }
         secretType = ((FMSK >> 4) & 0b00000001);//1
         safeBroadcast = ((FMSK >> 5) & 0b00000001) == 1;//1
         isBound = ((FMSK >> 6) & 0b00000001) == 1;//1
@@ -57,29 +70,11 @@ public class ManufacturerData implements Parcelable {
         for (int i = 5; i >= 0; i--) {
             didOrMac[i] = manufacturerSpecificDataBuffer.get();
         }
-        StringBuilder did = new StringBuilder();
-        StringBuilder scanId = new StringBuilder();
-        for (int i = 0; i < 6; i++) {
-            if (XJBleDevice.PLATFORM_AL.equals(platform)) {
-                did.append(String.format("%02x",
-                        ByteUtils.getUnsignedByte(didOrMac[i])));
-            } else {
-                did.append((char) Integer.parseInt(String.valueOf(didOrMac[i])));
-//                int i1 = Integer.parseInt(String.valueOf(didOrMac[i]));
-//                if (!isNeedAuth) {
-//                    if (encryptionType == 0) {//一型一密
-//                        scanId = scanId.append(String.format("%02x", ByteUtils.getUnsignedByte(didOrMac[i])));
-//                    } else {
-//                        scanId = scanId.append((char) i1);
-//                    }
-//                }
-//                did.append((char) i1);
-            }
+        if (XJBleDevice.PLATFORM_AL.equals(platform)) {
+            this.did = getLittleEndianHexString(didOrMac);
+        } else {
+            this.did = getLittleEndianString(didOrMac);
         }
-
-        this.did = did.toString();
-        this.scanId = scanId.toString();
-
     }
 
     @Override
@@ -160,4 +155,21 @@ public class ManufacturerData implements Parcelable {
             return new ManufacturerData[size];
         }
     };
+
+    public String getLittleEndianHexString(byte[] didOrMac) {
+        StringBuilder did = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            did.append(String.format("%02x",
+                    ByteUtils.getUnsignedByte(didOrMac[i])));
+        }
+        return did.toString();
+    }
+
+    public String getLittleEndianString(byte[] didOrMac) {
+        StringBuilder did = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            did.append((char) Integer.parseInt(String.valueOf(didOrMac[i])));
+        }
+        return did.toString();
+    }
 }

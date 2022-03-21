@@ -20,9 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cc.xiaojiang.lib.ble.XJBleDevice;
 import cc.xiaojiang.lib.ble.Constants;
-import cc.xiaojiang.lib.ble.IBleAuth;
+import cc.xiaojiang.lib.ble.XJBleDevice;
 import cc.xiaojiang.lib.ble.XJBleManager;
 import cc.xiaojiang.lib.ble.callback.BleConnectCallback;
 import cc.xiaojiang.lib.ble.callback.IBleScanCallback;
@@ -42,14 +41,15 @@ public class BleScanner {
     private BleScanState mBleScanState = BleScanState.STATE_IDLE;
     private BluetoothLeScanner bluetoothLeScanner;
     private IBleScanCallback iBleScanCallback;
-    private String autoConnectMac = "";
+    private final String autoConnectMac = "";
+    private String platform = "";
     public Map<Object, Object> productMap = new HashMap<>();
     private static final BleScanner ourInstance = new BleScanner();
 
     private BleScanner() {
     }
 
-    private ScanCallback scanCallback = new ScanCallback() {
+    private final ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
@@ -95,19 +95,16 @@ public class BleScanner {
             BleLog.w("getScanRecord null!");
             return null;
         }
-//        ScanRecordUtil scanRecordUtil = ScanRecordUtil.parseFromBytes(result.getScanRecord().getBytes());
-//        String cid = Integer.toHexString(scanRecordUtil.getCid()).toUpperCase();
-        XJBleDevice bleDevice = new XJBleDevice();
-//        bleDevice.setCid(cid);
+        XJBleDevice xjBleDevice = new XJBleDevice();
         byte[] manufacturerSpecificData = null;
-        if (result.getScanRecord().getServiceUuids().contains(ParcelUuid.fromString(Constants.UUID_XJ_SERVICE))) {
-            manufacturerSpecificData =
-                    result.getScanRecord().getManufacturerSpecificData(XJ_MANUFACTURER_ID);
-            bleDevice.setPlatform(XJBleDevice.PLATFORM_XJ);
-        } else if (result.getScanRecord().getServiceUuids().contains(ParcelUuid.fromString(Constants.UUID_AL_SERVICE))) {
-            manufacturerSpecificData =
-                    result.getScanRecord().getManufacturerSpecificData(AL_MANUFACTURER_ID);
-            bleDevice.setPlatform(XJBleDevice.PLATFORM_AL);
+        if (result.getScanRecord().getManufacturerSpecificData(Constants.XJ_MANUFACTURER_ID) != null) {
+            manufacturerSpecificData = result.getScanRecord().getManufacturerSpecificData(XJ_MANUFACTURER_ID);
+            platform = XJBleDevice.PLATFORM_XJ;
+            xjBleDevice.setPlatform(platform);
+        } else if (result.getScanRecord().getManufacturerSpecificData(AL_MANUFACTURER_ID) != null) {
+            manufacturerSpecificData = result.getScanRecord().getManufacturerSpecificData(AL_MANUFACTURER_ID);
+            platform = XJBleDevice.PLATFORM_AL;
+            xjBleDevice.setPlatform(platform);
         }
         if (manufacturerSpecificData == null) {
             BleLog.w("get manufacturerSpecificData null!");
@@ -117,14 +114,12 @@ public class BleScanner {
             BleLog.w("manufacturerSpecificData length error= " + manufacturerSpecificData.length);
             return null;
         }
-        BleLog.d("get Manufacturer Specific Data: " + ByteUtils.bytesToHexString
-                (manufacturerSpecificData));
-        ManufacturerData manufacturerData =
-                new ManufacturerData(manufacturerSpecificData, bleDevice.getPlatform());
-        bleDevice.setDevice(result.getDevice());
-        bleDevice.setRssi(result.getRssi());
-        bleDevice.setManufacturerData(manufacturerData);
-        return bleDevice;
+        BleLog.d("get Manufacturer Specific Data: " + ByteUtils.bytesToHexString(manufacturerSpecificData));
+        ManufacturerData manufacturerData = new ManufacturerData(manufacturerSpecificData, platform);
+        xjBleDevice.setDevice(result.getDevice());
+        xjBleDevice.setRssi(result.getRssi());
+        xjBleDevice.setManufacturerData(manufacturerData);
+        return xjBleDevice;
     }
 
     public XJBleDevice rnToBleDevice(HashMap<String, Object> propsMap, byte[] scanRecordBytes) {
@@ -139,7 +134,6 @@ public class BleScanner {
         xjBleDevice.setDevice(device);
         xjBleDevice.setRssi(rssi);
         xjBleDevice.setId(id);
-        String platform = "";
         byte[] manufacturerSpecificData = null;
         ScanRecordUtil scanRecordUtil = ScanRecordUtil.parseFromBytes(scanRecordBytes);
         if (scanRecordUtil.getManufacturerSpecificData() == null) {
@@ -148,11 +142,13 @@ public class BleScanner {
         if (scanRecordUtil.getManufacturerSpecificData(XJ_MANUFACTURER_ID) != null) {
             manufacturerSpecificData = scanRecordUtil.getManufacturerSpecificData(XJ_MANUFACTURER_ID);
             platform = XJBleDevice.PLATFORM_XJ;
-            xjBleDevice.setPlatform(XJBleDevice.PLATFORM_XJ);
-        } else if (scanRecordUtil.getManufacturerSpecificData(AL_MANUFACTURER_ID) != null) {
+            xjBleDevice.setPlatform(platform);
+            xjBleDevice.setCid(XJ_MANUFACTURER_ID);
+        } else if (scanRecordUtil.getManufacturerSpecificData() != null) {
             manufacturerSpecificData = scanRecordUtil.getManufacturerSpecificData(AL_MANUFACTURER_ID);
             platform = XJBleDevice.PLATFORM_AL;
-            xjBleDevice.setPlatform(XJBleDevice.PLATFORM_AL);
+            xjBleDevice.setPlatform(platform);
+            xjBleDevice.setCid(AL_MANUFACTURER_ID);
         }
         if (manufacturerSpecificData == null) {
             BleLog.w("get manufacturerSpecificData null!");
@@ -162,10 +158,8 @@ public class BleScanner {
             BleLog.w("manufacturerSpecificData length error= " + manufacturerSpecificData.length);
             return xjBleDevice;
         }
-        BleLog.d("get Manufacturer Specific Data: " + ByteUtils.bytesToHexString
-                (manufacturerSpecificData));
-        ManufacturerData manufacturerData =
-                new ManufacturerData(manufacturerSpecificData, platform);
+        BleLog.d("get Manufacturer Specific Data: " + ByteUtils.bytesToHexString(manufacturerSpecificData));
+        ManufacturerData manufacturerData = new ManufacturerData(manufacturerSpecificData, platform);
         xjBleDevice.setDevice(device);
         xjBleDevice.setRssi(rssi);
         xjBleDevice.setManufacturerData(manufacturerData);
@@ -185,7 +179,6 @@ public class BleScanner {
         startLeScan(new IBleScanCallback() {
             @Override
             public void onScanStarted(boolean success) {
-
             }
 
             @Override

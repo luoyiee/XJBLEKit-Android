@@ -59,7 +59,7 @@ public class BluetoothChangedObserver {
         private WeakReference<BluetoothChangedObserver> mObserverWeakReference;
 
         public BleReceiver(BluetoothChangedObserver bluetoothChangedObserver) {
-            mObserverWeakReference = new WeakReference<BluetoothChangedObserver>(bluetoothChangedObserver);
+            mObserverWeakReference = new WeakReference<>(bluetoothChangedObserver);
         }
 
         @Override

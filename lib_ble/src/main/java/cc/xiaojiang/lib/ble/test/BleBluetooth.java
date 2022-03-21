@@ -343,10 +343,6 @@ public class BleBluetooth {
                     if (bleConnectCallback != null) {
                         bleConnectCallback.onConnectSuccess(bleDevice, gatt, status);
                     }
-//                    //start indicate, delay 50ms
-//                    Message message = mainHandler.obtainMessage();
-//                    message.what = BleMsg.MSG_CHA_INDICATE_START;
-//                    mainHandler.sendMessageDelayed(message, 50);
                 }
                 break;
 

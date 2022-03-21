@@ -2,9 +2,11 @@ package cc.xiaojiang.lib.ble.exception;
 
 import java.io.Serializable;
 
+import lombok.Data;
 
+
+@Data
 public abstract class BleException implements Serializable {
-
 
     public static final int ERROR_CODE_TIMEOUT = 100;
     public static final int ERROR_CODE_GATT = 101;
@@ -18,24 +20,6 @@ public abstract class BleException implements Serializable {
     public BleException(int code, String description) {
         this.code = code;
         this.description = description;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public BleException setCode(int code) {
-        this.code = code;
-        return this;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public BleException setDescription(String description) {
-        this.description = description;
-        return this;
     }
 
     @Override

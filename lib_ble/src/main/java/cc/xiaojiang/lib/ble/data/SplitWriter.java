@@ -133,7 +133,6 @@ public class SplitWriter {
 
 
     private static Queue<byte[]> splitByte(byte[] data, int count) {
-//        if (count > 20) {
         if (count > SPLIT_WRITE_NUM) {
             BleLog.w("Be careful: split count beyond 20! Ensure MTU higher than 23!");
         }
