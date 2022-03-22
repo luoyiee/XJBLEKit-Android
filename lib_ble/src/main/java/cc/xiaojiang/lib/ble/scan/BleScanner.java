@@ -90,34 +90,37 @@ public class BleScanner {
     };
 
     private XJBleDevice scanResultToBleDevice(ScanResult result) {
+        XJBleDevice xjBleDevice = new XJBleDevice();
         //获取厂商自定义格式广播
         if (result.getScanRecord() == null) {
             BleLog.w("getScanRecord null!");
-            return null;
+            return xjBleDevice;
         }
-        XJBleDevice xjBleDevice = new XJBleDevice();
+        xjBleDevice.setDevice(result.getDevice());
+        xjBleDevice.setRssi(result.getRssi());
+        xjBleDevice.setId(xjBleDevice.getMac());
         byte[] manufacturerSpecificData = null;
         if (result.getScanRecord().getManufacturerSpecificData(Constants.XJ_MANUFACTURER_ID) != null) {
             manufacturerSpecificData = result.getScanRecord().getManufacturerSpecificData(XJ_MANUFACTURER_ID);
             platform = XJBleDevice.PLATFORM_XJ;
             xjBleDevice.setPlatform(platform);
+            xjBleDevice.setCid(XJ_MANUFACTURER_ID);
         } else if (result.getScanRecord().getManufacturerSpecificData(AL_MANUFACTURER_ID) != null) {
             manufacturerSpecificData = result.getScanRecord().getManufacturerSpecificData(AL_MANUFACTURER_ID);
             platform = XJBleDevice.PLATFORM_AL;
             xjBleDevice.setPlatform(platform);
+            xjBleDevice.setCid(AL_MANUFACTURER_ID);
         }
         if (manufacturerSpecificData == null) {
             BleLog.w("get manufacturerSpecificData null!");
-            return null;
+            return xjBleDevice;
         }
         if (manufacturerSpecificData.length != 12) {
             BleLog.w("manufacturerSpecificData length error= " + manufacturerSpecificData.length);
-            return null;
+            return xjBleDevice;
         }
         BleLog.d("get Manufacturer Specific Data: " + ByteUtils.bytesToHexString(manufacturerSpecificData));
         ManufacturerData manufacturerData = new ManufacturerData(manufacturerSpecificData, platform);
-        xjBleDevice.setDevice(result.getDevice());
-        xjBleDevice.setRssi(result.getRssi());
         xjBleDevice.setManufacturerData(manufacturerData);
         return xjBleDevice;
     }
@@ -160,8 +163,6 @@ public class BleScanner {
         }
         BleLog.d("get Manufacturer Specific Data: " + ByteUtils.bytesToHexString(manufacturerSpecificData));
         ManufacturerData manufacturerData = new ManufacturerData(manufacturerSpecificData, platform);
-        xjBleDevice.setDevice(device);
-        xjBleDevice.setRssi(rssi);
         xjBleDevice.setManufacturerData(manufacturerData);
         return xjBleDevice;
     }
