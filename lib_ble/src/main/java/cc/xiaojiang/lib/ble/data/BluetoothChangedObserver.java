@@ -1,5 +1,10 @@
 package cc.xiaojiang.lib.ble.data;
 
+import static android.bluetooth.BluetoothAdapter.STATE_OFF;
+import static android.bluetooth.BluetoothAdapter.STATE_ON;
+import static android.bluetooth.BluetoothAdapter.STATE_TURNING_OFF;
+import static android.bluetooth.BluetoothAdapter.STATE_TURNING_ON;
+
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -67,26 +72,24 @@ public class BluetoothChangedObserver {
             if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())) {
                 BluetoothChangedObserver observer = mObserverWeakReference.get();
                 int status = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-                if (status == BluetoothAdapter.STATE_ON) {
+                if (status == STATE_ON) {
                     //   BleLog.e("","系统蓝牙已开启");
                     if (observer.bleStatusCallback != null) {
-                        observer.bleStatusCallback.onBluetoothStatusChanged(true);
+                        observer.bleStatusCallback.onBluetoothStatusChanged(STATE_ON);
                     }
-//                    ConnectRequest request = Rproxy.getRequest(ConnectRequest.class);
-//                    request.openBluetooth();
-                } else if (status == BluetoothAdapter.STATE_OFF) {
+                } else if (status == STATE_OFF) {
                     //   BleLog.e("","系统蓝牙已关闭");
                     if (observer.bleStatusCallback != null) {
-                        observer.bleStatusCallback.onBluetoothStatusChanged(false);
+                        observer.bleStatusCallback.onBluetoothStatusChanged(STATE_OFF);
                     }
-//                    //如果正在扫描，则停止扫描
-//                    ScanRequest scanRequest = Rproxy.getRequest(ScanRequest.class);
-//                    if (scanRequest.isScanning()){
-//                        scanRequest.onStop();
-//                    }
-//                    //解决原生android系统,直接断开系统蓝牙不回调onConnectionStateChange接口问题
-//                    ConnectRequest request = Rproxy.getRequest(ConnectRequest.class);
-//                    request.closeBluetooth();
+                } else if (status == STATE_TURNING_ON) {
+                    if (observer.bleStatusCallback != null) {
+                        observer.bleStatusCallback.onBluetoothStatusChanged(STATE_TURNING_ON);
+                    }
+                } else if (status == STATE_TURNING_OFF) {
+                    if (observer.bleStatusCallback != null) {
+                        observer.bleStatusCallback.onBluetoothStatusChanged(STATE_TURNING_OFF);
+                    }
                 }
             }
         }
