@@ -323,16 +323,35 @@ public class BleBluetooth {
                 break;
 
                 case BleMsg.MSG_DISCOVER_FAIL: {
-                    if (mBleAuthCallback != null) {
-                        mBleAuthCallback.onAuthFail(bleDevice, ERROR_DISCOVER_FAIL);
+                    disconnect();
+                    refreshDeviceCache();
+                    closeBluetoothGatt();
+                    lastState = LastState.CONNECT_FAILURE;
+                    XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleBluetooth.this);
+                    if (bleConnectCallback != null) {
+                        bleConnectCallback.onConnectFail(bleDevice, new OtherException("GATT " +
+                                "discover " +
+                                "services exception occurred!"));
                     }
+//                    if (mBleAuthCallback != null) {
+//                        mBleAuthCallback.onAuthFail(bleDevice, ERROR_DISCOVER_FAIL);
+//                    }
                 }
                 break;
 
                 case BleMsg.MSG_DISCOVER_SUCCESS: {
-                    Message message = mainHandler.obtainMessage();
-                    message.what = BleMsg.MSG_CHA_INDICATE_START;
-                    mainHandler.sendMessageDelayed(message, 50);
+//                    Message message = mainHandler.obtainMessage();
+//                    message.what = BleMsg.MSG_CHA_INDICATE_START;
+//                    mainHandler.sendMessageDelayed(message, 50);
+                    lastState = LastState.CONNECT_CONNECTED;
+                    isActiveDisconnect = false;
+                    mAuthed = false;
+                    XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleBluetooth.this);
+                    XJBleManager.getInstance().getMultipleBluetoothController().addBleBluetooth(BleBluetooth.this);
+                    BleConnectStateParameter para1 = (BleConnectStateParameter) msg.obj;
+                    if (bleConnectCallback != null) {
+                        bleConnectCallback.onConnectSuccess(bleDevice, gatt, para1.getStatus());
+                    }
                 }
                 break;
 
@@ -679,14 +698,18 @@ public class BleBluetooth {
             mainHandler.removeMessages(BleMsg.MSG_CONNECT_OVER_TIME);
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
-                    lastState = LastState.CONNECT_CONNECTED;
-                    isActiveDisconnect = false;
-                    mAuthed = false;
-                    XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleBluetooth.this);
-                    XJBleManager.getInstance().getMultipleBluetoothController().addBleBluetooth(BleBluetooth.this);
-                    if (bleConnectCallback != null) {
-                        bleConnectCallback.onConnectSuccess(bleDevice, gatt, status);
-                    }
+                    Message message = mainHandler.obtainMessage();
+                    message.what = BleMsg.MSG_DISCOVER_SERVICES;
+                    message.arg1 = status;
+//                    mainHandler.sendMessageDelayed(message, 50);
+//                    lastState = LastState.CONNECT_CONNECTED;
+//                    isActiveDisconnect = false;
+//                    mAuthed = false;
+//                    XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleBluetooth.this);
+//                    XJBleManager.getInstance().getMultipleBluetoothController().addBleBluetooth(BleBluetooth.this);
+//                    if (bleConnectCallback != null) {
+//                        bleConnectCallback.onConnectSuccess(bleDevice, gatt, status);
+//                    }
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                     if (lastState == LastState.CONNECT_CONNECTING) {
                         Message message = mainHandler.obtainMessage();
@@ -1279,7 +1302,7 @@ public class BleBluetooth {
         this.mIBleAuth = iBleAuth;
         // start indicate, delay 50ms
         Message message = mainHandler.obtainMessage();
-        message.what = BleMsg.MSG_DISCOVER_SERVICES;
+        message.what = BleMsg.MSG_CHA_INDICATE_START;
         mainHandler.sendMessageDelayed(message, 50);
     }
 
