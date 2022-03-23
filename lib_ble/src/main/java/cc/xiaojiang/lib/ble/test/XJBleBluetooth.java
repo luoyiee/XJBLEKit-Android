@@ -19,7 +19,6 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
-import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -56,7 +55,6 @@ import cc.xiaojiang.lib.ble.callback.ota.SendResultCallBack;
 import cc.xiaojiang.lib.ble.data.BleMsg;
 import cc.xiaojiang.lib.ble.data.BlePacket;
 import cc.xiaojiang.lib.ble.data.SplitWriter;
-import cc.xiaojiang.lib.ble.exception.AuthException;
 import cc.xiaojiang.lib.ble.exception.BleException;
 import cc.xiaojiang.lib.ble.exception.ConnectException;
 import cc.xiaojiang.lib.ble.exception.OTAException;
@@ -67,7 +65,7 @@ import cc.xiaojiang.lib.ble.utils.AES;
 import cc.xiaojiang.lib.ble.utils.BleLog;
 import cc.xiaojiang.lib.ble.utils.ByteUtils;
 
-public class BleBluetooth {
+public class XJBleBluetooth {
     private byte mMsgId = 1;
     private int mSendTotal = 0;
     private int mSendCurrent = 0;
@@ -88,7 +86,7 @@ public class BleBluetooth {
     private OtaResultCallback mOtaResultCallback;
     private BleDataChangeCallback mBleDataChangeCallback;
     private BleAuthCallback mBleAuthCallback;
-    private LastState lastState;
+    public LastState lastState;
     private boolean isActiveDisconnect = false;
     private XJBleDevice bleDevice;
     private final MainHandler mainHandler = new MainHandler(Looper.getMainLooper());
@@ -119,7 +117,7 @@ public class BleBluetooth {
     };
 
 
-    public BleBluetooth(XJBleDevice bleDevice) {
+    public XJBleBluetooth(XJBleDevice bleDevice) {
         this.bleDevice = bleDevice;
     }
 
@@ -186,7 +184,7 @@ public class BleBluetooth {
             refreshDeviceCache();
             closeBluetoothGatt();
             lastState = LastState.CONNECT_FAILURE;
-            XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleBluetooth.this);
+//            XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleBluetooth.this);
             if (bleConnectCallback != null)
                 bleConnectCallback.onConnectFail(bleDevice, new OtherException("GATT connect exception occurred!"));
 
@@ -201,9 +199,36 @@ public class BleBluetooth {
     }
 
     public synchronized void disconnect() {
+
+        XJBleManager.getInstance().getMultipleBluetoothController().removeBle(XJBleBluetooth.this);
+
         isActiveDisconnect = true;
-        disconnectGatt();
+        if (lastState == XJBleBluetooth.LastState.CONNECT_CONNECTED) {
+            disconnectGatt();
+        } else {
+            lastState = LastState.CONNECT_IDLE;
+            disconnectGatt();
+            refreshDeviceCache();
+            closeBluetoothGatt();
+            removeConnectGattCallback();
+            mainHandler.removeCallbacksAndMessages(null);
+
+        }
     }
+
+//    public synchronized void disconnect() {
+////        isActiveDisconnect = true;
+////        int state = XJBleManager.getInstance().getConnectState(bleDevice);
+////        if (state == 2) {
+////            disconnectGatt();
+////        } else {
+////            lastState = LastState.CONNECT_IDLE;
+////            refreshDeviceCache();
+////            closeBluetoothGatt();
+////            removeConnectGattCallback();
+////            mainHandler.removeCallbacksAndMessages(null);
+////        }
+//    }
 
     public synchronized void destroy() {
         lastState = LastState.CONNECT_IDLE;
@@ -251,7 +276,7 @@ public class BleBluetooth {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case BleMsg.MSG_CONNECT_FAIL: {
-                    disconnect();
+                    disconnectGatt();
                     refreshDeviceCache();
                     closeBluetoothGatt();
                     if (connectRetryCount < XJBleManager.getInstance().getReConnectCount()) {
@@ -260,7 +285,7 @@ public class BleBluetooth {
                         BleLog.d("reconnect " + reconnectCount + "/" + CONNECT_RETRY_TIME);
                     } else {
                         lastState = LastState.CONNECT_FAILURE;
-                        XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleBluetooth.this);
+                        XJBleManager.getInstance().getMultipleBluetoothController().removeBle(XJBleBluetooth.this);
                         BleConnectStateParameter para = (BleConnectStateParameter) msg.obj;
                         int status = para.getStatus();
                         if (bleConnectCallback != null)
@@ -270,9 +295,10 @@ public class BleBluetooth {
                 break;
 
                 case BleMsg.MSG_DISCONNECTED: {
+                    XJBleManager.getInstance().getMultipleBluetoothController().removeBle(XJBleBluetooth.this);
+
                     lastState = LastState.CONNECT_DISCONNECT;
-                    XJBleManager.getInstance().getMultipleBluetoothController().removeBleBluetooth(BleBluetooth.this);
-                    disconnect();
+//                    disconnectGatt();
                     refreshDeviceCache();
                     closeBluetoothGatt();
                     mainHandler.removeCallbacksAndMessages(null);
@@ -282,10 +308,6 @@ public class BleBluetooth {
                     int status = para.getStatus();
                     if (bleConnectCallback != null)
                         bleConnectCallback.onDisConnected(bleDevice, gatt, status);
-                    if (gatt != null) {
-                        gatt.close();
-                        gatt = null;
-                    }
                     if (mBleDisConnectCallback != null) {
                         mBleDisConnectCallback.onResult(BluetoothGatt.GATT_SUCCESS);
                     }
@@ -293,11 +315,13 @@ public class BleBluetooth {
                 break;
 
                 case BleMsg.MSG_CONNECT_OVER_TIME: {
-                    disconnect();
+                    XJBleManager.getInstance().getMultipleBluetoothController().removeBle(XJBleBluetooth.this);
+
+                    disconnectGatt();
                     refreshDeviceCache();
                     closeBluetoothGatt();
                     lastState = LastState.CONNECT_FAILURE;
-                    XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleBluetooth.this);
+//                    XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleBluetooth.this);
                     if (bleConnectCallback != null)
                         bleConnectCallback.onConnectFail(bleDevice, new TimeoutException());
                 }
@@ -682,8 +706,8 @@ public class BleBluetooth {
                     lastState = LastState.CONNECT_CONNECTED;
                     isActiveDisconnect = false;
                     mAuthed = false;
-                    XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleBluetooth.this);
-                    XJBleManager.getInstance().getMultipleBluetoothController().addBleBluetooth(BleBluetooth.this);
+//                    XJBleManager.getInstance().getMultipleBluetoothController().removeConnectingBle(BleBluetooth.this);
+                    XJBleManager.getInstance().getMultipleBluetoothController().addConnectedBle(XJBleBluetooth.this);
                     if (bleConnectCallback != null) {
                         bleConnectCallback.onConnectSuccess(bleDevice, gatt, status);
                     }
@@ -706,7 +730,7 @@ public class BleBluetooth {
             } else {// 防止出现status 133
                 Log.d("H5", "防止出现status" + status);
                 Message message = mainHandler.obtainMessage();
-                message.what = BleMsg.MSG_DISCONNECTED;
+                message.what = BleMsg.MSG_CONNECT_FAIL;
                 message.arg1 = status;
                 message.obj = new BleConnectStateParameter(status);
                 mainHandler.sendMessage(message);

@@ -8,16 +8,15 @@ import android.os.Message;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import cc.xiaojiang.lib.ble.PayLoadUtils;
 import cc.xiaojiang.lib.ble.callback.BleWriteCallback;
 import cc.xiaojiang.lib.ble.exception.BleException;
 import cc.xiaojiang.lib.ble.exception.OtherException;
-import cc.xiaojiang.lib.ble.test.BleBluetooth;
+import cc.xiaojiang.lib.ble.test.XJBleBluetooth;
 import cc.xiaojiang.lib.ble.utils.BleLog;
 
 public class SplitWriter {
     private static int SPLIT_WRITE_NUM = 15;
-    private BleBluetooth mBleBluetooth;
+    private XJBleBluetooth mXJBleBluetooth;
     private HandlerThread mHandlerThread;
     private Handler mHandler;
 
@@ -47,12 +46,12 @@ public class SplitWriter {
         };
     }
 
-    public void splitWrite(BleBluetooth bleBluetooth,byte[] data, byte cmd, byte msgId,
+    public void splitWrite(XJBleBluetooth XJBleBluetooth, byte[] data, byte cmd, byte msgId,
                            boolean sendNextWhenLastSuccess,
                            long intervalBetweenTwoPackage,
                            int split_write_num,
                            BleWriteCallback callback) {
-        mBleBluetooth = bleBluetooth;
+        mXJBleBluetooth = XJBleBluetooth;
         mData = data;
         mMsgId = msgId;
         mCmd = cmd;
@@ -87,7 +86,7 @@ public class SplitWriter {
         }
 
         byte[] data = mDataQueue.poll();
-        mBleBluetooth.writeSingle(data, mTotalNum - 1, mPosition,
+        mXJBleBluetooth.writeSingle(data, mTotalNum - 1, mPosition,
                 mCmd, mMsgId,
                 new BleWriteCallback() {
                     @Override

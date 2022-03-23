@@ -2,7 +2,6 @@ package cc.xiaojiang.lib.ble;
 
 import static cc.xiaojiang.lib.ble.Constants.DEFAULT_CONNECT_OVER_TIME;
 
-import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
@@ -38,7 +37,7 @@ import cc.xiaojiang.lib.ble.exception.OTAException;
 import cc.xiaojiang.lib.ble.exception.OtherException;
 import cc.xiaojiang.lib.ble.scan.BleScanState;
 import cc.xiaojiang.lib.ble.scan.BleScanner;
-import cc.xiaojiang.lib.ble.test.BleBluetooth;
+import cc.xiaojiang.lib.ble.test.XJBleBluetooth;
 import cc.xiaojiang.lib.ble.test.MultipleBluetoothController;
 import cc.xiaojiang.lib.ble.utils.BleLog;
 import cc.xiaojiang.lib.ble.utils.ByteUtils;
@@ -101,39 +100,39 @@ public class XJBleManager {
 
 
     public void startAuth(XJBleDevice bleDevice,IBleAuth iBleAuth) {
-        BleBluetooth bleBluetooth = DeviceReady(bleDevice);
-        if (bleBluetooth == null) {
+        XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
+        if (XJBleBluetooth == null) {
             return;
         }
-        bleBluetooth.startAuth(bleDevice,iBleAuth);
+        XJBleBluetooth.startAuth(bleDevice,iBleAuth);
     }
 
     public void getSnapshot(XJBleDevice bleDevice, BleSnapshotGetCallback callback) {
-        BleBluetooth bleBluetooth = DeviceReady(bleDevice);
-        if (bleBluetooth == null) {
+        XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
+        if (XJBleBluetooth == null) {
             callback.onResult(1,"");
             return;
         }
-        bleBluetooth.getSnapshot(callback);
+        XJBleBluetooth.getSnapshot(callback);
     }
 
     public void setData(XJBleDevice bleDevice, byte[] payload, BleDataSetCallback callback) {
-        BleBluetooth bleBluetooth = DeviceReady(bleDevice);
-        if (bleBluetooth == null) {
+        XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
+        if (XJBleBluetooth == null) {
             callback.onResult(1);
             return;
         }
-        bleBluetooth.setData(payload, callback);
+        XJBleBluetooth.setData(payload, callback);
     }
 
 
     public void getData(XJBleDevice bleDevice, byte[] payload, BleDataGetCallback callback) {
-        BleBluetooth bleBluetooth = DeviceReady(bleDevice);
-        if (bleBluetooth == null) {
+        XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
+        if (XJBleBluetooth == null) {
             callback.onResult(1,"");
             return;
         }
-        bleBluetooth.getData(payload,callback);
+        XJBleBluetooth.getData(payload,callback);
     }
 
     public void sendApInfoWithSSID(XJBleDevice bleDevice, String ssid, String pwd,
@@ -152,12 +151,12 @@ public class XJBleManager {
         payloadBuffer.put(tokenBytes);
         payloadBuffer.put(areaTypeBytes);
         payloadBuffer.put(areaIdBytes);
-        BleBluetooth bleBluetooth = DeviceReady(bleDevice);
-        if (bleBluetooth == null) {
+        XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
+        if (XJBleBluetooth == null) {
             callback.onBleWifiConfigFailed(1);
             return;
         }
-        bleBluetooth.startBleWifiConfig(payloadBuffer.array(), callback);
+        XJBleBluetooth.startBleWifiConfig(payloadBuffer.array(), callback);
     }
 
 
@@ -166,12 +165,12 @@ public class XJBleManager {
         // 0x02-表示MCU设备固件
         // 0x00-表示同时查询以上两个固件版本
         byte[] firmwareTypeArray = ByteUtils.byteToBytes((byte) 0x00);
-        BleBluetooth bleBluetooth = DeviceReady(bleDevice);
-        if (bleBluetooth == null) {
+        XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
+        if (XJBleBluetooth == null) {
             callback.onVersionFailed(new OTAException());
             return;
         }
-        bleBluetooth.queryVersion(firmwareTypeArray, iBleAuth, callback);
+        XJBleBluetooth.queryVersion(firmwareTypeArray, iBleAuth, callback);
     }
 
     //升级请求--0xA1
@@ -193,11 +192,11 @@ public class XJBleManager {
         payloadBuffer.put(verifyTypeBytes);
         payloadBuffer.put(verifyValueBytes);
         payloadBuffer.put(fileSizeBytes);
-        BleBluetooth bleBluetooth = DeviceReady(bleDevice);
-        if (bleBluetooth == null) {
+        XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
+        if (XJBleBluetooth == null) {
             return;
         }
-        bleBluetooth.otaRequestOTA(payloadBuffer.array(), bean, resultCallback, progressCallBack);
+        XJBleBluetooth.otaRequestOTA(payloadBuffer.array(), bean, resultCallback, progressCallBack);
     }
 
     public void removeGpsObserver() {
@@ -278,23 +277,23 @@ public class XJBleManager {
     }
 
     public void addDataChangeListener(XJBleDevice bleDevice, BleDataChangeCallback callback) {
-        BleBluetooth bleBluetooth = DeviceReady(bleDevice);
-        if (bleBluetooth != null) {
-            bleBluetooth.addDataChangeListener(callback);
+        XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
+        if (XJBleBluetooth != null) {
+            XJBleBluetooth.addDataChangeListener(callback);
         }
     }
 
     public void addAuthStateListener(XJBleDevice bleDevice, BleAuthCallback callback) {
-        BleBluetooth bleBluetooth = DeviceReady(bleDevice);
-        if (bleBluetooth != null) {
-            bleBluetooth.addAuthStateListener(callback);
+        XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
+        if (XJBleBluetooth != null) {
+            XJBleBluetooth.addAuthStateListener(callback);
         }
     }
 
     public void addSendResultListener(XJBleDevice bleDevice, SendResultCallBack callback) {
-        BleBluetooth bleBluetooth = DeviceReady(bleDevice);
-        if (bleBluetooth != null) {
-            bleBluetooth.addSendResultCallback(callback);
+        XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
+        if (XJBleBluetooth != null) {
+            XJBleBluetooth.addSendResultCallback(callback);
         }
     }
 
@@ -365,9 +364,9 @@ public class XJBleManager {
     }
 
     public void stopOTA(XJBleDevice bleDevice) {
-        BleBluetooth bleBluetooth = DeviceReady(bleDevice);
-        if (bleBluetooth != null) {
-            bleBluetooth.stopOTA();
+        XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
+        if (XJBleBluetooth != null) {
+            XJBleBluetooth.stopOTA();
         }
     }
 
@@ -417,8 +416,13 @@ public class XJBleManager {
         if (bleDevice == null || bleDevice.getDevice() == null) {
             callback.onConnectFail(bleDevice, new OtherException("Not Found Device Exception Occurred!"));
         } else {
-            BleBluetooth bleBluetooth = multipleBluetoothController.buildConnectingBle(bleDevice);
-            return bleBluetooth.connect(bleDevice, callback);
+            XJBleBluetooth ble = multipleBluetoothController.getConnectBluetooth(bleDevice);
+            if (ble != null) {
+                ble.addConnectGattCallback(callback);
+                return null;
+            }
+            XJBleBluetooth XJBleBluetooth = multipleBluetoothController.buildConnectBle(bleDevice);
+            return XJBleBluetooth.connect(bleDevice, callback);
         }
         return null;
     }
@@ -543,13 +547,13 @@ public class XJBleManager {
     }
 
 
-    public void destroy(XJBleDevice bleDevice) {
-//        removeBleObserver();
-//        removeGpsObserver();
-        if (multipleBluetoothController != null) {
-            multipleBluetoothController.destroy(bleDevice);
-        }
-    }
+//    public void destroy(XJBleDevice bleDevice) {
+////        removeBleObserver();
+////        removeGpsObserver();
+//        if (multipleBluetoothController != null) {
+//            multipleBluetoothController.destroy(bleDevice);
+//        }
+//    }
 
     /**
      * Get operate connect Over Time
@@ -575,8 +579,8 @@ public class XJBleManager {
     }
 
 
-    public BleBluetooth DeviceReady(XJBleDevice bleDevice) {
-        return multipleBluetoothController.getBleBluetooth(bleDevice);
+    public XJBleBluetooth DeviceReady(XJBleDevice bleDevice) {
+        return multipleBluetoothController.getConnectedBleBluetooth(bleDevice);
     }
 
 }
