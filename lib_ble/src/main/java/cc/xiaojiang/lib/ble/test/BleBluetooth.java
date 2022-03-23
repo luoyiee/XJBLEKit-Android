@@ -701,7 +701,7 @@ public class BleBluetooth {
                     Message message = mainHandler.obtainMessage();
                     message.what = BleMsg.MSG_DISCOVER_SERVICES;
                     message.arg1 = status;
-//                    mainHandler.sendMessageDelayed(message, 50);
+                    mainHandler.sendMessageDelayed(message, 50);
 //                    lastState = LastState.CONNECT_CONNECTED;
 //                    isActiveDisconnect = false;
 //                    mAuthed = false;
