@@ -108,7 +108,6 @@ public class MultipleBluetoothController {
         }
     }
 
-
     /**
      * 断开所有蓝牙设备
      */
