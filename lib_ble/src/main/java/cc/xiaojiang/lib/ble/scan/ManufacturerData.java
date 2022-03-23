@@ -68,7 +68,11 @@ public class ManufacturerData implements Parcelable {
         if (XJBleDevice.PLATFORM_AL.equals(platform)) {
             this.did = getLittleEndianHexString(didOrMac);
         } else {
-            this.did = getLittleEndianString(didOrMac);
+            if (secretAuthEnable) {
+                this.did = getLittleEndianString(didOrMac);
+            } else {
+                this.did = getLittleEndianHexString(didOrMac);
+            }
         }
     }
 
