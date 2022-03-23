@@ -60,10 +60,12 @@ public class MultipleBluetoothController {
         bleLruHashMap.remove(bleBluetooth.getDeviceKey());
     }
 
-    public synchronized boolean isContainDevice(XJBleDevice bleDevice) {
+    public synchronized boolean isContainConnectedDevice(XJBleDevice bleDevice) {
         return bleDevice != null && bleLruHashMap.containsKey(bleDevice.getKey());
     }
-
+    public synchronized boolean isContainConnectingDevice(XJBleDevice bleDevice) {
+        return bleDevice != null && bleTempHashMap.containsKey(bleDevice.getKey());
+    }
 
     public synchronized boolean isContainDevice(BluetoothDevice bluetoothDevice) {
         return bluetoothDevice != null && bleLruHashMap.containsKey(bluetoothDevice.getName() + bluetoothDevice.getAddress());
@@ -84,8 +86,14 @@ public class MultipleBluetoothController {
      * @param bleDevice
      */
     public synchronized void disconnect(XJBleDevice bleDevice) {
-        if (isContainDevice(bleDevice)) {
+        if (isContainConnectedDevice(bleDevice)) {
             getBleBluetooth(bleDevice).disconnect();
+        }
+    }
+
+    public  void destroy(XJBleDevice bleDevice) {
+        if (isContainConnectedDevice(bleDevice)||isContainConnectingDevice(bleDevice)) {
+            getBleBluetooth(bleDevice).destroy();
         }
     }
 
@@ -95,7 +103,7 @@ public class MultipleBluetoothController {
      * @param bleDevice
      */
     public synchronized void disconnectWithCallback(XJBleDevice bleDevice, BleDisConnectCallback callback) {
-        if (isContainDevice(bleDevice)) {
+        if (isContainConnectedDevice(bleDevice)) {
             getBleBluetooth(bleDevice).disconnectWithCallback(callback);
         }
     }

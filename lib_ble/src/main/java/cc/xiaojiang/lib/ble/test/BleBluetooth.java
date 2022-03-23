@@ -207,7 +207,7 @@ public class BleBluetooth {
 
     public synchronized void destroy() {
         lastState = LastState.CONNECT_IDLE;
-        disconnectGatt();
+//        disconnectGatt();
         refreshDeviceCache();
         closeBluetoothGatt();
         removeConnectGattCallback();

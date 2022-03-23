@@ -542,6 +542,15 @@ public class XJBleManager {
         }
     }
 
+
+    public void destroy(XJBleDevice bleDevice) {
+//        removeBleObserver();
+//        removeGpsObserver();
+        if (multipleBluetoothController != null) {
+            multipleBluetoothController.destroy(bleDevice);
+        }
+    }
+
     /**
      * Get operate connect Over Time
      *
