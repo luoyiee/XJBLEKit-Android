@@ -12,7 +12,6 @@ import java.util.Map;
 
 import cc.xiaojiang.lib.ble.XJBleDevice;
 import cc.xiaojiang.lib.ble.XJBleManager;
-import cc.xiaojiang.lib.ble.callback.BleDisConnectCallback;
 
 /**
  * 蓝牙设备列表处理，添加、移除，断开
@@ -121,16 +120,6 @@ public class MultipleBluetoothController {
 //        bleTempHashMap.remove(bleDevice.getKey());
 //    }
 
-    /**
-     * 断开蓝牙设备的连接
-     *
-     * @param bleDevice
-     */
-    public synchronized void disconnectWithCallback(XJBleDevice bleDevice, BleDisConnectCallback callback) {
-        if (containConnectedDevice(bleDevice)) {
-            getConnectBluetooth(bleDevice).disconnectWithCallback(callback);
-        }
-    }
 
     /**
      * 断开所有蓝牙设备

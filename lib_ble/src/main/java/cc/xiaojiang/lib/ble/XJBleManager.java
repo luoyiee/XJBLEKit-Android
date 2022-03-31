@@ -21,7 +21,6 @@ import cc.xiaojiang.lib.ble.callback.BleConnectCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataChangeCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataGetCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataSetCallback;
-import cc.xiaojiang.lib.ble.callback.BleDisConnectCallback;
 import cc.xiaojiang.lib.ble.callback.BleSnapshotGetCallback;
 import cc.xiaojiang.lib.ble.callback.BleWifiConfigCallback;
 import cc.xiaojiang.lib.ble.callback.IBleScanCallback;
@@ -474,19 +473,6 @@ public class XJBleManager {
         return false;
     }
 
-
-//    public boolean isConnected(String mac) {
-//        try {
-//            BluetoothDevice bluetoothDevice = bluetoothAdapter.getRemoteDevice(mac);
-//            BleDevice bleDevice = new BleDevice();
-//            bleDevice.setDevice(bluetoothDevice);
-//            return isConnected(bleDevice);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return false;
-//        }
-//    }
-
     /**
      * 获取所有连接的设备
      *
@@ -532,12 +518,6 @@ public class XJBleManager {
         }
     }
 
-    public void disconnect(XJBleDevice bleDevice, BleDisConnectCallback callback) {
-        if (multipleBluetoothController != null) {
-            multipleBluetoothController.disconnectWithCallback(bleDevice,callback);
-        }
-    }
-
     public void destroy() {
         removeBleObserver();
         removeGpsObserver();
@@ -545,15 +525,6 @@ public class XJBleManager {
             multipleBluetoothController.destroy();
         }
     }
-
-
-//    public void destroy(XJBleDevice bleDevice) {
-////        removeBleObserver();
-////        removeGpsObserver();
-//        if (multipleBluetoothController != null) {
-//            multipleBluetoothController.destroy(bleDevice);
-//        }
-//    }
 
     /**
      * Get operate connect Over Time

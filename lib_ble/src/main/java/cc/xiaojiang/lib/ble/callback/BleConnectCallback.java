@@ -11,5 +11,5 @@ public interface BleConnectCallback {
     void onConnectFail(XJBleDevice XJBleDevice, BleException exception);
 
     void onDisConnected(XJBleDevice XJBleDevice,
-                        BluetoothGatt bluetoothGatt, int status);
+                        BluetoothGatt bluetoothGatt, int status, boolean isActiveDisconnect);
 }
