@@ -151,6 +151,21 @@ public class MultipleBluetoothController {
     }
 
     /**
+     * 获取所有连接的蓝牙设备列表
+     *
+     * @return
+     */
+    public synchronized List<XJBleDevice> getAllDeviceList() {
+        List<XJBleDevice> deviceList = new ArrayList<>();
+        for (XJBleBluetooth XJBleBluetooth : getBleBluetoothList()) {
+            if (XJBleBluetooth != null) {
+                deviceList.add(XJBleBluetooth.getDevice());
+            }
+        }
+        return deviceList;
+    }
+
+    /**
      * 获取已经连接的蓝牙设备列表
      *
      * @return
