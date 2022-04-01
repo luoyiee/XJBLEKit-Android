@@ -492,6 +492,18 @@ public class XJBleManager {
         }
     }
 
+    /**
+     * 获取所有连接的设备
+     *
+     * @return
+     */
+    public List<XJBleDevice> getAllConnectDevice() {
+        if (multipleBluetoothController == null)
+            return null;
+        return multipleBluetoothController.getAllDeviceList();
+    }
+
+
 
     public XJBleDevice getConnectedDevice(String mac) {
         if (multipleBluetoothController == null)
