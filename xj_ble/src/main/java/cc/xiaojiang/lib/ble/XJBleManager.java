@@ -1,6 +1,8 @@
 package cc.xiaojiang.lib.ble;
 
 import static cc.xiaojiang.lib.ble.Constants.DEFAULT_CONNECT_OVER_TIME;
+import static cc.xiaojiang.lib.ble.exception.ConnectException.ERROR_BLE_NOT_ENABLE;
+import static cc.xiaojiang.lib.ble.exception.ConnectException.ERROR_NO_DEVICE;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
@@ -21,6 +23,7 @@ import cc.xiaojiang.lib.ble.callback.BleConnectCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataChangeCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataGetCallback;
 import cc.xiaojiang.lib.ble.callback.BleDataSetCallback;
+import cc.xiaojiang.lib.ble.callback.BleDisConnectCallback;
 import cc.xiaojiang.lib.ble.callback.BleSnapshotGetCallback;
 import cc.xiaojiang.lib.ble.callback.BleWifiConfigCallback;
 import cc.xiaojiang.lib.ble.callback.IBleScanCallback;
@@ -98,18 +101,18 @@ public class XJBleManager {
     }
 
 
-    public void startAuth(XJBleDevice bleDevice,IBleAuth iBleAuth) {
+    public void startAuth(XJBleDevice bleDevice, IBleAuth iBleAuth, BleAuthCallback callback) {
         XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
         if (XJBleBluetooth == null) {
             return;
         }
-        XJBleBluetooth.startAuth(bleDevice,iBleAuth);
+        XJBleBluetooth.startAuth(bleDevice, iBleAuth, callback);
     }
 
     public void getSnapshot(XJBleDevice bleDevice, BleSnapshotGetCallback callback) {
         XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
         if (XJBleBluetooth == null) {
-            callback.onResult(1,"");
+            callback.onResult(1, "");
             return;
         }
         XJBleBluetooth.getSnapshot(callback);
@@ -128,10 +131,10 @@ public class XJBleManager {
     public void getData(XJBleDevice bleDevice, byte[] payload, BleDataGetCallback callback) {
         XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
         if (XJBleBluetooth == null) {
-            callback.onResult(1,"");
+            callback.onResult(1, "");
             return;
         }
-        XJBleBluetooth.getData(payload,callback);
+        XJBleBluetooth.getData(payload, callback);
     }
 
     public void sendApInfoWithSSID(XJBleDevice bleDevice, String ssid, String pwd,
@@ -282,24 +285,12 @@ public class XJBleManager {
         }
     }
 
-    public void addAuthStateListener(XJBleDevice bleDevice, BleAuthCallback callback) {
-        XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
-        if (XJBleBluetooth != null) {
-            XJBleBluetooth.addAuthStateListener(callback);
-        }
-    }
-
     public void addSendResultListener(XJBleDevice bleDevice, SendResultCallBack callback) {
         XJBleBluetooth XJBleBluetooth = DeviceReady(bleDevice);
         if (XJBleBluetooth != null) {
             XJBleBluetooth.addSendResultCallback(callback);
         }
     }
-
-
-//    public void addConnectionStateChangeListener(IBleConnectionCallback callback) {
-//        BleConnect.getInstance().addConnectGattCallback(callback);
-//    }
 
 //    public boolean isConnected(String mac) {
 //        try {
@@ -406,22 +397,22 @@ public class XJBleManager {
             throw new IllegalArgumentException("BleGattCallback can not be Null!");
         }
         if (!isBleEnable()) {
-            callback.onConnectFail(bleDevice, new OtherException("Bluetooth not enable!"));
+            callback.onConnectFail(bleDevice, ERROR_BLE_NOT_ENABLE);
             return null;
         }
         if (Looper.myLooper() == null || Looper.myLooper() != Looper.getMainLooper()) {
             BleLog.w("Be careful: currentThread is not MainThread!");
         }
         if (bleDevice == null || bleDevice.getDevice() == null) {
-            callback.onConnectFail(bleDevice, new OtherException("Not Found Device Exception Occurred!"));
+            callback.onConnectFail(bleDevice, ERROR_NO_DEVICE);
         } else {
             XJBleBluetooth ble = multipleBluetoothController.getConnectBluetooth(bleDevice);
             if (ble != null) {
                 ble.addConnectGattCallback(callback);
                 return null;
             }
-            XJBleBluetooth XJBleBluetooth = multipleBluetoothController.buildConnectBle(bleDevice);
-            return XJBleBluetooth.connect(bleDevice, callback);
+            XJBleBluetooth xjBleBluetooth = multipleBluetoothController.buildConnectBle(bleDevice);
+            return xjBleBluetooth.connect(bleDevice, callback);
         }
         return null;
     }
@@ -473,6 +464,19 @@ public class XJBleManager {
         return false;
     }
 
+
+//    public boolean isConnected(String mac) {
+//        try {
+//            BluetoothDevice bluetoothDevice = bluetoothAdapter.getRemoteDevice(mac);
+//            BleDevice bleDevice = new BleDevice();
+//            bleDevice.setDevice(bluetoothDevice);
+//            return isConnected(bleDevice);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+//    }
+
     /**
      * 获取所有连接的设备
      *
@@ -482,14 +486,6 @@ public class XJBleManager {
         if (multipleBluetoothController == null)
             return null;
         return multipleBluetoothController.getDeviceList();
-    }
-
-    public int getConnectState(XJBleDevice bleDevice) {
-        if (bleDevice != null) {
-            return bluetoothManager.getConnectionState(bleDevice.getDevice(), BluetoothProfile.GATT);
-        } else {
-            return BluetoothProfile.STATE_DISCONNECTED;
-        }
     }
 
     /**
@@ -503,6 +499,13 @@ public class XJBleManager {
         return multipleBluetoothController.getAllDeviceList();
     }
 
+    public int getConnectState(XJBleDevice bleDevice) {
+        if (bleDevice != null) {
+            return bluetoothManager.getConnectionState(bleDevice.getDevice(), BluetoothProfile.GATT);
+        } else {
+            return BluetoothProfile.STATE_DISCONNECTED;
+        }
+    }
 
 
     public XJBleDevice getConnectedDevice(String mac) {
@@ -530,12 +533,15 @@ public class XJBleManager {
         }
     }
 
-    public void destroy() {
+    public void disconnect(XJBleDevice bleDevice, BleDisConnectCallback callback) {
+        if (multipleBluetoothController != null) {
+            multipleBluetoothController.disconnectWithCallback(bleDevice, callback);
+        }
+    }
+
+    public void removeObserver() {
         removeBleObserver();
         removeGpsObserver();
-        if (multipleBluetoothController != null) {
-            multipleBluetoothController.destroy();
-        }
     }
 
     /**

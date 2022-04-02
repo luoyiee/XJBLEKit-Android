@@ -1,6 +1,8 @@
 package cc.xiaojiang.lib.ble.scan;
 
 import static cc.xiaojiang.lib.ble.Constants.AL_MANUFACTURER_ID;
+import static cc.xiaojiang.lib.ble.Constants.PLATFORM_AL;
+import static cc.xiaojiang.lib.ble.Constants.PLATFORM_XJ;
 import static cc.xiaojiang.lib.ble.Constants.XJ_MANUFACTURER_ID;
 
 import android.bluetooth.BluetoothAdapter;
@@ -96,18 +98,19 @@ public class BleScanner {
             BleLog.w("getScanRecord null!");
             return xjBleDevice;
         }
+
         xjBleDevice.setDevice(result.getDevice());
         xjBleDevice.setRssi(result.getRssi());
         xjBleDevice.setId(xjBleDevice.getMac());
         byte[] manufacturerSpecificData = null;
         if (result.getScanRecord().getManufacturerSpecificData(Constants.XJ_MANUFACTURER_ID) != null) {
             manufacturerSpecificData = result.getScanRecord().getManufacturerSpecificData(XJ_MANUFACTURER_ID);
-            platform = XJBleDevice.PLATFORM_XJ;
+            platform = PLATFORM_XJ;
             xjBleDevice.setPlatform(platform);
             xjBleDevice.setCid(XJ_MANUFACTURER_ID);
         } else if (result.getScanRecord().getManufacturerSpecificData(AL_MANUFACTURER_ID) != null) {
             manufacturerSpecificData = result.getScanRecord().getManufacturerSpecificData(AL_MANUFACTURER_ID);
-            platform = XJBleDevice.PLATFORM_AL;
+            platform = PLATFORM_AL;
             xjBleDevice.setPlatform(platform);
             xjBleDevice.setCid(AL_MANUFACTURER_ID);
         }
@@ -144,12 +147,12 @@ public class BleScanner {
         }
         if (scanRecordUtil.getManufacturerSpecificData(XJ_MANUFACTURER_ID) != null) {
             manufacturerSpecificData = scanRecordUtil.getManufacturerSpecificData(XJ_MANUFACTURER_ID);
-            platform = XJBleDevice.PLATFORM_XJ;
+            platform = PLATFORM_XJ;
             xjBleDevice.setPlatform(platform);
             xjBleDevice.setCid(XJ_MANUFACTURER_ID);
         } else if (scanRecordUtil.getManufacturerSpecificData() != null) {
             manufacturerSpecificData = scanRecordUtil.getManufacturerSpecificData(AL_MANUFACTURER_ID);
-            platform = XJBleDevice.PLATFORM_AL;
+            platform = PLATFORM_AL;
             xjBleDevice.setPlatform(platform);
             xjBleDevice.setCid(AL_MANUFACTURER_ID);
         }

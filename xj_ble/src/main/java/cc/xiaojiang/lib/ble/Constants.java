@@ -22,8 +22,8 @@ public class Constants {
 
     public static final int XJ_MANUFACTURER_ID = 0xF018;
     public static final int AL_MANUFACTURER_ID = 0x01A8;
-    public static final String XJ_COMPANY_ID = "F018";
-    public static final String AL_COMPANY_ID = "01A8";
+    public static final String PLATFORM_XJ = "xj";
+    public static final String PLATFORM_AL = "tm";
     /**
      * 常量
      */

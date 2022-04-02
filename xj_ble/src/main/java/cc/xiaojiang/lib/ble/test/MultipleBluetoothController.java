@@ -12,6 +12,7 @@ import java.util.Map;
 
 import cc.xiaojiang.lib.ble.XJBleDevice;
 import cc.xiaojiang.lib.ble.XJBleManager;
+import cc.xiaojiang.lib.ble.callback.BleDisConnectCallback;
 
 /**
  * 蓝牙设备列表处理，添加、移除，断开
@@ -110,16 +111,16 @@ public class MultipleBluetoothController {
         }
     }
 
-
-//    public void destroy(XJBleDevice bleDevice) {
-//
-//
-////        getBleBluetooth(bleDevice).destroy();
-//        bleLruHashMap.remove(bleDevice.getKey());
-//        getConnectingBluetooth(bleDevice).destroy();
-//        bleTempHashMap.remove(bleDevice.getKey());
-//    }
-
+    /**
+     * 断开蓝牙设备的连接
+     *
+     * @param bleDevice
+     */
+    public synchronized void disconnectWithCallback(XJBleDevice bleDevice, BleDisConnectCallback callback) {
+        if (containConnectedDevice(bleDevice)) {
+            getConnectBluetooth(bleDevice).disconnectWithCallback(callback);
+        }
+    }
 
     /**
      * 断开所有蓝牙设备
@@ -131,19 +132,6 @@ public class MultipleBluetoothController {
         bleLruHashMap.clear();
     }
 
-    public void destroy() {
-        for (Map.Entry<String, XJBleBluetooth> stringBleBluetoothEntry : bleLruHashMap.entrySet()) {
-            stringBleBluetoothEntry.getValue().destroy();
-            Log.d("H5", "destroy  bleLruHashMap");
-        }
-        bleLruHashMap.clear();
-        for (Map.Entry<String, XJBleBluetooth> stringBleBluetoothEntry : bleTempHashMap.entrySet()) {
-            stringBleBluetoothEntry.getValue().destroy();
-            Log.d("H5", "destroy  bleTempHashMap");
-        }
-        bleTempHashMap.clear();
-    }
-
     private synchronized List<XJBleBluetooth> getBleBluetoothList() {
         List<XJBleBluetooth> XJBleBluetoothList = new ArrayList<>(bleLruHashMap.values());
         Collections.sort(XJBleBluetoothList, (lhs, rhs) -> lhs.getDeviceKey().compareToIgnoreCase(rhs.getDeviceKey()));
@@ -151,11 +139,12 @@ public class MultipleBluetoothController {
     }
 
     /**
-     * 获取所有连接的蓝牙设备列表
+     * 获取已经连接的蓝牙设备列表
      *
      * @return
      */
-    public synchronized List<XJBleDevice> getAllDeviceList() {
+    public synchronized List<XJBleDevice> getDeviceList() {
+        refreshConnectedDevice();
         List<XJBleDevice> deviceList = new ArrayList<>();
         for (XJBleBluetooth XJBleBluetooth : getBleBluetoothList()) {
             if (XJBleBluetooth != null) {
@@ -170,8 +159,7 @@ public class MultipleBluetoothController {
      *
      * @return
      */
-    public synchronized List<XJBleDevice> getDeviceList() {
-        refreshConnectedDevice();
+    public synchronized List<XJBleDevice> getAllDeviceList() {
         List<XJBleDevice> deviceList = new ArrayList<>();
         for (XJBleBluetooth XJBleBluetooth : getBleBluetoothList()) {
             if (XJBleBluetooth != null) {

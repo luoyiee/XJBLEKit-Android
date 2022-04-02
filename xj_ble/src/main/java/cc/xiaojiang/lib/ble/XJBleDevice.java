@@ -4,46 +4,54 @@ import android.bluetooth.BluetoothDevice;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
 import cc.xiaojiang.lib.ble.scan.ManufacturerData;
 import lombok.Data;
 
 @Data
 public class XJBleDevice implements Parcelable {
-    //小匠平台
-    public static final String PLATFORM_XJ = "xj";
-    //阿里平台
-    public static final String PLATFORM_AL = "tm";
     private BluetoothDevice device;
     private ManufacturerData manufacturerData = new ManufacturerData();
+    //    @Accessors(prefix = "m")
     private int rssi = 0;
-    private String id = "";
-    private String platform = "";
-    private String random = "";
+    private String platform = "", id = "", random = "";
     private int cid;
-    private BluetoothDevice mDevice; // 扫描到的设备实例
+    private byte[] scanRecord;
+    private long timestampNanos;
 
     public XJBleDevice(BluetoothDevice device) {
-        mDevice = device;
+        this.device = device;
+    }
+
+    public XJBleDevice(BluetoothDevice device, int rssi, byte[] scanRecord, long timestampNanos) {
+        this.device = device;
+        this.scanRecord = scanRecord;
+        this.rssi = rssi;
+        this.timestampNanos = timestampNanos;
     }
 
     public XJBleDevice() {
     }
 
     public String getKey() {
-        if (device != null)
+        if (device != null) {
             return device.getName() + device.getAddress();
+        }
         return "";
     }
 
     public String getName() {
-        if (device != null)
+        if (device != null) {
             return device.getName();
+        }
         return null;
     }
 
     public String getMac() {
-        if (device != null)
+        if (device != null) {
             return device.getAddress();
+        }
         return null;
     }
 
@@ -59,15 +67,6 @@ public class XJBleDevice implements Parcelable {
         dest.writeParcelable(this.manufacturerData, flags);
         dest.writeInt(this.rssi);
         dest.writeString(this.platform);
-        dest.writeString(this.random);
-    }
-
-    public void readFromParcel(Parcel source) {
-        this.device = source.readParcelable(BluetoothDevice.class.getClassLoader());
-        this.manufacturerData = source.readParcelable(ManufacturerData.class.getClassLoader());
-        this.rssi = source.readInt();
-        this.platform = source.readString();
-        this.random = source.readString();
     }
 
     protected XJBleDevice(Parcel in) {
@@ -75,7 +74,6 @@ public class XJBleDevice implements Parcelable {
         this.manufacturerData = in.readParcelable(ManufacturerData.class.getClassLoader());
         this.rssi = in.readInt();
         this.platform = in.readString();
-        this.random = in.readString();
     }
 
     public static final Creator<XJBleDevice> CREATOR = new Creator<XJBleDevice>() {
@@ -90,6 +88,7 @@ public class XJBleDevice implements Parcelable {
         }
     };
 
+    @NonNull
     @Override
     public String toString() {
         return "BleDevice{" +

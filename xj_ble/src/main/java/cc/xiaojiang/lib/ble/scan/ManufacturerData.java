@@ -1,5 +1,7 @@
 package cc.xiaojiang.lib.ble.scan;
 
+import static cc.xiaojiang.lib.ble.Constants.PLATFORM_AL;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -29,7 +31,7 @@ public class ManufacturerData implements Parcelable {
     }
 
     public String getPid() {
-        if (XJBleDevice.PLATFORM_AL.equals(platform)) {
+        if (PLATFORM_AL.equals(platform)) {
             if (map.get(pid) != null) {
                 return String.valueOf(map.get(pid));
             }
@@ -65,7 +67,7 @@ public class ManufacturerData implements Parcelable {
         for (int i = 5; i >= 0; i--) {
             didOrMac[i] = manufacturerSpecificDataBuffer.get();
         }
-        if (XJBleDevice.PLATFORM_AL.equals(platform)) {
+        if (PLATFORM_AL.equals(platform)) {
             this.did = getLittleEndianHexString(didOrMac);
         } else {
             if (secretAuthEnable) {
